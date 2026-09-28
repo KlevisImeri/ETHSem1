@@ -1,0 +1,123 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=2cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\setlist{nosep}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.4em}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\DeclareMathOperator{\OPT}{OPT}
+\DeclareMathOperator{\poly}{poly}
+
+\title{Advanced Algorithms\\\large Klevis Imeri Lecture Notes}
+\author{}
+\date{Autumn 2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Approximation Algorithms}
+
+\begin{definition}[Problem]
+\[
+\Pi:=(\mathcal I,\mathcal S,\mathcal F).
+\]
+\[
+\mathcal I:=\{\,I:I\ \text{is an instance}\,\},
+\qquad
+\mathcal S:=\{\,S:S\ \text{is a solution}\,\},
+\]
+\[
+\mathcal F:\mathcal I\to 2^{\mathcal S}\ \text{feasibility map}.
+\]
+\end{definition}
+
+\begin{definition}[Optimization problem]
+\[
+\Pi:=(\mathcal I,\mathcal S,\mathcal F,c,\mathrm{goal}).
+\]
+\[
+\mathrm{goal}\in\{\min,\max\},
+\qquad
+c:\mathcal I\times\mathcal S\to\mathbb R_{\geq 0}\ \text{cost function}.
+\]
+\[
+I\in\mathcal I,
+\qquad
+\mathcal F(I)\neq\varnothing.
+\]
+\[
+\OPT(I)\in\mathcal F(I):
+\qquad
+c\bigl(I,\OPT(I)\bigr)=
+\begin{cases}
+\min\limits_{S\in\mathcal F(I)}c(I,S), & \mathrm{goal}=\min,\\[0.6em]
+\max\limits_{S\in\mathcal F(I)}c(I,S), & \mathrm{goal}=\max.
+\end{cases}
+\]
+\end{definition}
+
+\begin{definition}[Algorithm]
+\[
+\mathcal A:\mathcal I\to\mathcal S,
+\qquad
+\mathcal A(I)\in\mathcal F(I).
+\]
+\[
+\Pi:=(\mathcal I,\mathcal S,\mathcal F)\ \text{problem}.
+\]
+\end{definition}
+
+\begin{definition}[Polynomial]
+\[
+\poly(n):=\{\,f:\exists c\in\mathbb N,\ f\in O(n^{c})\,\}.
+\]
+\end{definition}
+
+\begin{definition}[Running time (TODO)]
+\end{definition}
+
+\begin{definition}[Efficient algorithm]
+\[
+\mathrm{time}_{\mathcal A}(I)\leq\mathrm{poly}(|I|).
+\]
+\end{definition}
+
+\begin{definition}[$\alpha$-approximation]
+\[
+\mathcal A\ \text{is an}\ \alpha\text{-approximation}
+\iff
+\forall I\in\mathcal I:\
+\begin{cases}
+c\bigl(I,\mathcal A(I)\bigr)\leq\alpha\,c\bigl(I,\OPT(I)\bigr), & \mathrm{goal}=\min,\\[0.6em]
+c\bigl(I,\OPT(I)\bigr)\leq\alpha\,c\bigl(I,\mathcal A(I)\bigr), & \mathrm{goal}=\max.
+\end{cases}
+\]
+\[
+\Pi:=(\mathcal I,\mathcal S,\mathcal F,c,\mathrm{goal})\ \text{optimization problem},
+\qquad
+\mathcal A:\mathcal I\to\mathcal S,\ \mathcal A(I)\in\mathcal F(I)\ \text{algorithm},
+\qquad
+\alpha\in\mathbb R_{\geq 1}.
+\]
+\end{definition}
+
+\end{document}
