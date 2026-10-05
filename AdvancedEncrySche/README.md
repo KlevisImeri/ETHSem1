@@ -1,4 +1,4 @@
-# Advanced Algorithms Notes
+# Advanced Encryption Schemes Notes
 
 ## Writing convention
 

@@ -1,29 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-
-\usepackage[margin=2cm]{geometry}
-\usepackage{amsmath,amssymb,amsthm,mathtools}
-\usepackage{enumitem}
-\usepackage{microtype}
-\usepackage[hidelinks]{hyperref}
-
-\setlist{nosep}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{0.4em}
-
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
-
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
-
-\theoremstyle{remark}
-\newtheorem*{remark}{Remark}
-
-\DeclareMathOperator{\OPT}{OPT}
-\DeclareMathOperator{\poly}{poly}
+\input{preamble}
 
 \title{Advanced Algorithms\\\large Klevis Imeri Lecture Notes}
 \author{}
@@ -38,51 +14,74 @@
 
 \begin{definition}[Problem]
 \[
-\Pi:=(\mathcal I,\mathcal S,\mathcal F).
+\Pi:=(\mathcal I,\mathcal S).
 \]
 \[
-\mathcal I:=\{\,I:I\ \text{is an instance}\,\},
-\qquad
-\mathcal S:=\{\,S:S\ \text{is a solution}\,\},
+\begin{aligned}
+\text{Input:}\quad&I\in\mathcal I,\\
+\text{Output:}\quad&S\in\mathcal S_I.
+\end{aligned}
 \]
 \[
-\mathcal F:\mathcal I\to 2^{\mathcal S}\ \text{feasibility map}.
+\begin{aligned}
+\Pi&:\text{ problem},\\
+\mathcal I&:\text{ instance space},\qquad I:\text{ instance},\\
+\mathcal S&:\text{ set of possible outputs},\qquad S:\text{ output},\\
+\mathcal S_I&:=\{\,S\in\mathcal S:S\text{ is valid for }I\,\}.
+\end{aligned}
 \]
 \end{definition}
 
+\noindent\begin{minipage}{\linewidth}
 \begin{definition}[Optimization problem]
 \[
-\Pi:=(\mathcal I,\mathcal S,\mathcal F,c,\mathrm{goal}).
+\Pi:=(\mathcal I,\mathcal S).
 \]
 \[
-\mathrm{goal}\in\{\min,\max\},
-\qquad
-c:\mathcal I\times\mathcal S\to\mathbb R_{\geq 0}\ \text{cost function}.
+c:\mathcal I\times\mathcal S\to\mathbb R_{\geq0}.
 \]
 \[
-I\in\mathcal I,
-\qquad
-\mathcal F(I)\neq\varnothing.
+\text{For fixed }I:\quad c(S):=c(I,S),\qquad c(\OPT(I)):=c(I,\OPT(I)).
 \]
 \[
-\OPT(I)\in\mathcal F(I):
-\qquad
-c\bigl(I,\OPT(I)\bigr)=
+\OPT(I)\in\mathcal S_I:=
 \begin{cases}
-\min\limits_{S\in\mathcal F(I)}c(I,S), & \mathrm{goal}=\min,\\[0.6em]
-\max\limits_{S\in\mathcal F(I)}c(I,S), & \mathrm{goal}=\max.
+\displaystyle\operatorname*{arg\,min}_{T\in\mathcal S}c(T), & \text{minimization},\\[0.6em]
+\displaystyle\operatorname*{arg\,max}_{T\in\mathcal S}c(T), & \text{maximization}.
 \end{cases}
+\quad\text{+ other constraints}.
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ optimization problem},\\
+\mathcal I&:\text{ instance space},\qquad I:\text{ instance},\\
+\mathcal S&:\text{ set of possible outputs},\qquad S:\text{ output},\\
+\mathcal S_I&:\text{ optimal solutions for }I,\\
+c&:\text{ cost function},\qquad c(S):\text{ cost of }S\text{ for }I,\\
+\OPT(I)&:\text{ optimal solution for }I\text{ (assumed to exist)}.
+\end{aligned}
 \]
 \end{definition}
+\end{minipage}\par
 
 \begin{definition}[Algorithm]
 \[
 \mathcal A:\mathcal I\to\mathcal S,
 \qquad
-\mathcal A(I)\in\mathcal F(I).
+\forall I\in\mathcal I:\ \mathcal A(I)\in\mathcal S_I.
 \]
 \[
-\Pi:=(\mathcal I,\mathcal S,\mathcal F)\ \text{problem}.
+\Pi:=(\mathcal I,\mathcal S).
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ problem},\\
+\mathcal I&:\text{ instance space},\qquad I:\text{ instance},\\
+\mathcal S&:\text{ set of possible outputs},\\
+\mathcal S_I&:=\{\,S\in\mathcal S:S\text{ is valid for }I\,\},\\
+\mathcal A&:\text{ algorithm},\qquad
+\mathcal A(I):\text{ solution returned on }I.
+\end{aligned}
 \]
 \end{definition}
 
@@ -90,34 +89,671 @@ c\bigl(I,\OPT(I)\bigr)=
 \[
 \poly(n):=\{\,f:\exists c\in\mathbb N,\ f\in O(n^{c})\,\}.
 \]
+\[
+\begin{aligned}
+\poly(n)&:\text{ functions bounded by a polynomial in }n,\\
+n&:\text{ input size},\\
+f&:\text{ function},\\
+c&:\text{ constant exponent},\\
+O(n^c)&:\text{ asymptotic upper bound of order }n^c.
+\end{aligned}
+\]
 \end{definition}
 
 \begin{definition}[Running time (TODO)]
 \end{definition}
 
+\noindent\begin{minipage}{\linewidth}
 \begin{definition}[Efficient algorithm]
 \[
-\mathrm{time}_{\mathcal A}(I)\leq\mathrm{poly}(|I|).
+\exists p\in\poly(n)\ \forall I\in\mathcal I:
+\quad \mathrm{time}_{\mathcal A}(I)\leq p(|I|).
+\]
+\[
+\begin{aligned}
+\mathcal A&:\text{ algorithm},\\
+\mathcal I&:\text{ instance space},\qquad I:\text{ instance},\\
+|I|&:\text{ encoding length of the instance }I,\\
+\mathrm{time}_{\mathcal A}(I)&:\text{ running time of }\mathcal A\text{ on }I,\\
+p&:\text{ polynomial bound},\qquad n:\text{ input size}.
+\end{aligned}
 \]
 \end{definition}
+\end{minipage}\par
 
+\noindent\begin{minipage}{\linewidth}
 \begin{definition}[$\alpha$-approximation]
+\label{def:alpha-approximation}
 \[
+\begin{gathered}
 \mathcal A\ \text{is an}\ \alpha\text{-approximation}
-\iff
-\forall I\in\mathcal I:\
+\iff\\[3pt]
+\bigl[\exists p\in\poly(n)\ \forall I\in\mathcal I:
+\mathrm{time}_{\mathcal A}(I)\leq p(|I|)\bigr]\ \land\\[3pt]
+\forall I\in\mathcal I:\\[3pt]
 \begin{cases}
-c\bigl(I,\mathcal A(I)\bigr)\leq\alpha\,c\bigl(I,\OPT(I)\bigr), & \mathrm{goal}=\min,\\[0.6em]
-c\bigl(I,\OPT(I)\bigr)\leq\alpha\,c\bigl(I,\mathcal A(I)\bigr), & \mathrm{goal}=\max.
+c\bigl(\mathcal A(I)\bigr)\leq\alpha(I)\,c\bigl(\OPT(I)\bigr), & \text{minimization},\\[0.6em]
+c\bigl(\OPT(I)\bigr)\leq\alpha(I)\,c\bigl(\mathcal A(I)\bigr), & \text{maximization}.
+\end{cases}
+\end{gathered}
+\]
+\[
+\Pi:=(\mathcal I,\mathcal S),
+\qquad \alpha:\mathcal I\to\mathbb R_{\geq1}.
+\]
+\[
+\mathcal A:\mathcal I\to\mathcal S,
+\qquad \forall I\in\mathcal I:\ \mathcal A(I)\text{ is feasible for }I.
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ optimization problem},\\
+\mathcal I&:\text{ instance space},\qquad I:\text{ instance},\\
+\mathcal S&:\text{ set of possible outputs},\\
+\mathcal S_I&:\text{ optimal solutions for }I,\\
+c&:\text{ cost function},\\
+\mathcal A&:\text{ algorithm},\\
+\OPT(I)&:\text{ optimal solution for }I,\\
+\alpha&:\text{ approximation-factor function},\\
+\alpha(I)&:\text{ approximation factor for }I.
+\end{aligned}
+\]
+\[
+\text{Constant factor }a\geq1:\quad \alpha(I):=a\quad(\forall I\in\mathcal I).
+\]
+\end{definition}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{definition}[Minimum set cover]
+\[
+\Pi_{\text{minimum set cover}}:=(\mathcal I,\mathcal S).
+\]
+\[
+\begin{aligned}
+\mathcal I&:=\left\{\,(U,S,w):
+1\leq|U|<\infty,\ S\subseteq 2^U,\
+\bigcup_{S_i\in S}S_i=U,\ w:S\to\mathbb R_{\geq 0}\,\right\},\\[3pt]
+I&=(U,S,w)\in\mathcal I,\qquad c(T):=\sum_{S_i\in T}w(S_i),\\[3pt]
+\OPT(I)\in\mathcal S_I&:=\left\{\,T\subseteq S:
+\displaystyle\bigcup_{S_i\in T}S_i=U
+\land\ T\in\operatorname*{arg\,min}_{\substack{T'\subseteq S\\\bigcup_{S_i\in T'}S_i=U}}c(T')
+\,\right\}.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\mathcal I&:\text{ instance space},\\
+\mathcal S&:\text{ set of possible outputs},\\
+\mathcal S_I&:\text{ minimum-cost covers of }U,\\
+c&:\text{ cost function},\\
+I&:\text{ instance},\\
+U&:\text{ nonempty finite universe},\\
+S&:\text{ collection of available subsets of }U,\\
+S_i&:\text{ individual available set},\\
+T&:\text{ selected subcollection},\\
+w(S_i)&:\text{ cost of set }S_i,\\
+c(T)&:\text{ total cost of the selected sets},\\
+2^U&:\text{ power set of }U.
+\end{aligned}
+\]
+\end{definition}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{example}[Minimum set cover]
+\[
+U:=\{e_1,e_2,e_3,e_4,e_5\},
+\qquad S:=\{S_1,S_2,S_3,S_4\},
+\qquad I:=(U,S,w).
+\]
+\[
+\begin{array}{c|c|c}
+i & S_i & w(S_i):=i^2\\ \hline
+1 & \{e_1,e_2,e_5\} & 1\\
+2 & \{e_4\} & 4\\
+3 & \{e_2,e_3\} & 9\\
+4 & \{e_1,e_4,e_5\} & 16
+\end{array}
+\]
+\[
+T:=\{S_3,S_4\}\subseteq S,\qquad\bigcup_{S_i\in T}S_i=U,
+\qquad c(T)=9+16=25.
+\]
+\[
+T^*:=\OPT(I)=\{S_1,S_2,S_3\},
+\qquad c(T^*)=1+4+9=14.
+\]
+\[
+|T^*|=3>2=|T|,
+\qquad c(T^*)=14<25=c(T).
+\]
+\end{example}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{theorem}[Complexity of minimum set cover]
+\[
+\Pi_{\text{minimum set cover}}\in\mathrm{NP\text{-}hard}.
+\]
+\[
+\mathrm{SC}_{\mathrm{dec}}:=\left\{\,(U,S,k):
+\begin{array}{l}
+|U|<\infty,\ S\subseteq 2^U,\ k\in\mathbb N,\\
+\exists T\subseteq S:\ |T|\leq k,\ \displaystyle\bigcup_{S_i\in T}S_i=U
+\end{array}\,\right\}.
+\]
+\[
+\mathrm{SC}_{\mathrm{dec}}\in\mathrm{NPC}.
+\]
+\end{theorem}
+
+\begin{proof}[Proof (Intuition)]
+A proposed cover can be checked in polynomial time: count its sets and check
+that their union is the universe. Thus the decision problem is in NP.
+
+Vertex Cover, a known NP-complete problem, asks whether at most $k$ vertices
+can touch every edge of a graph. Turn each edge into an element of $U$, and
+each vertex into the set of edges touching it. Selecting vertices that touch
+every edge is then equivalent to selecting sets that cover $U$. This
+construction takes polynomial time, so Set Cover is NP-hard and hence
+NP-complete as a decision problem.
+
+With every set cost equal to $1$, an optimal cover also tells us whether a
+cover with at most $k$ sets exists. Finding an optimal cover is therefore
+NP-hard.
+\end{proof}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{definition}[Greedy set cover algorithm]
+\[
+\mathcal A(I):=\mathsf{GreedySetCover}(U,S,w).
+\]
+\[
+\ppi(S_j):=\begin{cases}
+\dfrac{w(S_j)}{|S_j|},&S_j\neq\varnothing,\\[3pt]
+\infty,&S_j=\varnothing.
+\end{cases}
+\]
+\begin{algorithm}[H]
+\caption{$\mathsf{GreedySetCover}(U,S,w)$}
+\begin{algorithmic}[1]
+\If{$U=\varnothing$}
+    \State \Return $\varnothing$
+\Else
+    \State $S_i\in\displaystyle\operatorname*{arg\,min}_{S_j\in S}\ppi(S_j)$
+    \State $U'\gets U\setminus S_i$
+    \State $S'\gets\{\,S_j':=S_j\setminus S_i:S_j\in S\,\}$
+    \State $w(S_j')\gets w(S_j)\quad(\forall S_j'\in S')$
+    \State \Return $\{S_i\}\cup\mathsf{GreedySetCover}(U',S',w)$
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+\[
+\Pi_{\text{minimum set cover}}=(\mathcal I,\mathcal S).
+\]
+\[
+\begin{aligned}
+U&:\text{ remaining universe},\\
+S&:\text{ collection of remaining sets},\\
+w(S_j)&:\text{ cost of set }S_j,\\
+\ppi(S_j)&:\text{ cost per remaining element of }S_j,\\
+S_i&:\text{ set chosen in the current call},\\
+U'&:\text{ universe after removing the elements of }S_i,\\
+S_j'&:\text{ remaining elements of }S_j,\\
+S'&:\text{ collection of sets for the recursive call}.
+\end{aligned}
+\]
+\end{definition}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{example}[Greedy set cover]
+\[
+U_0:=\{e_1,e_2,e_3,e_4,e_5\},\qquad
+S:=\{S_1,S_2,S_3,S_4\}.
+\]
+\[
+\begin{aligned}
+S_1&=\{e_1,e_2,e_5\},&\qquad S_2&=\{e_4\},\\
+S_3&=\{e_2,e_3\},& S_4&=\{e_1,e_4,e_5\}.
+\end{aligned}
+\]
+\[
+w(S_j):=j^2\quad(j\in\{1,2,3,4\}),\qquad
+I:=(U_0,S,w).
+\]
+\[
+S_j^{(t)}:=S_j\cap U_t,\qquad
+S^{(t)}:=\{\,S_j^{(t)}:j\in\{1,2,3,4\}\,\}.
+\]
+\[
+\ppi_{j,t}:=\ppi(S_j^{(t)})=\begin{cases}
+\dfrac{w(S_j)}{|S_j^{(t)}|},&S_j^{(t)}\neq\varnothing,\\[3pt]
+\infty,&S_j^{(t)}=\varnothing.
 \end{cases}
 \]
 \[
-\Pi:=(\mathcal I,\mathcal S,\mathcal F,c,\mathrm{goal})\ \text{optimization problem},
-\qquad
-\mathcal A:\mathcal I\to\mathcal S,\ \mathcal A(I)\in\mathcal F(I)\ \text{algorithm},
-\qquad
-\alpha\in\mathbb R_{\geq 1}.
+i_t\in\operatorname*{arg\,min}_{j\in\{1,2,3,4\}}\ppi_{j,t},\qquad
+U_{t+1}:=U_t\setminus S_{i_t}.
+\]
+\[
+\renewcommand{\arraystretch}{1.5}
+\begin{array}{c|c|cccc|c|c}
+t&U_t&\ppi_{1,t}&\ppi_{2,t}&\ppi_{3,t}&\ppi_{4,t}&S_{i_t}&U_{t+1}\\ \hline
+0&U_0&\frac13&4&\frac92&\frac{16}{3}&S_1&\{e_3,e_4\}\\
+1&\{e_3,e_4\}&\infty&4&9&16&S_2&\{e_3\}\\
+2&\{e_3\}&\infty&\infty&9&\infty&S_3&\varnothing
+\end{array}
+\]
+\[
+\mathsf{GreedySetCover}(U_3,S^{(3)},w)=\varnothing.
+\]
+\[
+\begin{aligned}
+\mathcal A(I)
+&=\mathsf{GreedySetCover}(U_0,S^{(0)},w)\\
+&=\{S_1\}\cup\bigl(\{S_2\}\cup(\{S_3\}\cup\varnothing)\bigr)\\
+&=\{S_1,S_2,S_3\},\\[3pt]
+c\bigl(\mathcal A(I)\bigr)&=1+4+9=14.
+\end{aligned}
+\]
+\end{example}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{theorem}[Termination, feasibility, and efficiency of greedy set cover]
+\label{thm:greedy-efficient}
+\begin{flalign*}
+&\forall I=(U,S,w)\in\mathcal I:\quad
+\mathsf{GreedySetCover}(U,S,w)\text{ terminates, is feasible, and is efficient}.&&
+\end{flalign*}
+\end{theorem}
+\begin{proof}
+\setlength{\jot}{2pt}
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+\setlength{\abovedisplayshortskip}{3pt}
+\setlength{\belowdisplayshortskip}{3pt}
+\begin{flalign*}
+&\begin{aligned}
+&I=(U,S,w)\in\mathcal I,\qquad \mathcal A(I):=\mathsf{GreedySetCover}(U,S,w),\\
+&U_t:\text{ remaining universe after }t\text{ selections},\qquad U_0:=U.
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\text{1. Termination:}\quad
+\mathcal A(I)\text{ terminates}\ \iff\ \exists r\in\mathbb N_{\geq0}:\ U_r=\varnothing.&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&i_t:\text{ index of the greedy set selected at step }t,\\
+&U_t\neq\varnothing\ \Longrightarrow\ |S_{i_t}\cap U_t|\geq1,\\
+&U_{t+1}:=U_t\setminus S_{i_t},\qquad
+|U_{t+1}|=|U_t|-|S_{i_t}\cap U_t|\leq|U_t|-1\\
+&\Longrightarrow\ \exists r\leq|U|:\ U_r=\varnothing.
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\text{2. Feasibility:}\quad
+\mathcal A(I)\text{ is feasible}\ \iff\
+\mathcal A(I)\subseteq S\ \land\ \bigcup_{S_j\in\mathcal A(I)}S_j=U.&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&T_t:=\{S_{i_s}:0\leq s<t\},\qquad T_0=\varnothing,\qquad T_{t+1}=T_t\cup\{S_{i_t}\},\\
+&T_t\subseteq S\ \land\ U_t=U\setminus\bigcup_{S_j\in T_t}S_j\qquad\text{(induction on }t\text{)},\\
+&\mathcal A(I)=T_r\subseteq S\ \land\
+\varnothing=U_r=U\setminus\bigcup_{S_j\in T_r}S_j
+\ \Longrightarrow\ \bigcup_{S_j\in\mathcal A(I)}S_j=U.
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\text{3. Efficiency:}\quad
+\mathcal A\text{ is efficient}\ \iff\
+\exists q\text{ polynomial}\ \forall I\in\mathcal I:\
+\operatorname{time}_{\mathcal A}(I)\leq q(|I|).&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&\#\text{ operations per call}\in O(|S|\,|U|),\qquad
+\#\text{ recursive calls}=r+1\leq|U|+1,\\
+&|U|\leq|I|\ \land\ |S|\leq|I|\ \Longrightarrow\
+\#\text{ operations}\in O(|S|\,|U|^2)\subseteq O(|I|^3),\\
+&\operatorname{time}_{\text{one operation}}\in\poly(|I|)
+\ \Longrightarrow\ \operatorname{time}_{\mathcal A}(I)\in\poly(|I|).
+\end{aligned}&&
+\end{flalign*}
+\end{proof}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{definition}[Harmonic number]
+\[
+H_0:=0,\qquad H_n:=\sum_{\ell=1}^{n}\frac1\ell
+\qquad(n\in\mathbb N_{\geq1}).
+\]
+\[
+H_n:\text{ the }n\text{-th harmonic number}.
 \]
 \end{definition}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lemma}[Price of the first greedy set]\label{lem:greedy-price}
+\begin{flalign*}
+&\begin{aligned}
+&I=(U,S,w)\in\mathcal I,\qquad n:=|U|,\\
+&\OPT^*:=\OPT(I),\qquad \OPT:=\OPT^*\setminus\{\varnothing\},\qquad c(\OPT)=c(\OPT^*),\\
+&S_i\in\operatorname*{arg\,min}_{S_j\in S}\ppi(S_j)
+\quad\Longrightarrow\quad \ppi(S_i)\leq\frac{c(\OPT)}{n}.
+\end{aligned}&&
+\end{flalign*}
+\end{lemma}
+\begin{proof}
+\setlength{\jot}{2pt}
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+\setlength{\abovedisplayshortskip}{3pt}
+\setlength{\belowdisplayshortskip}{3pt}
+\begin{flalign*}
+&\begin{aligned}
+&\bigcup_{O_j\in \OPT}O_j=U\ \Longrightarrow\ \sum_{O_j\in \OPT}|O_j|\geq n.\\
+&c(\OPT)=\sum_{O_j\in \OPT}w(O_j)=\sum_{O_j\in \OPT}|O_j|\ppi(O_j).
+\end{aligned}&&
+\end{flalign*}
+\begingroup\small
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+\setlength{\abovedisplayshortskip}{3pt}
+\setlength{\belowdisplayshortskip}{3pt}
+\begin{flalign*}
+&\begin{aligned}
+&\ppi(S_i)
+=\min_{S_j\in S}\ppi(S_j)
+\leq\min_{O_j\in \OPT}\ppi(O_j)
+\leq\frac{\sum_{O_j\in \OPT}|O_j|\ppi(O_j)}{\sum_{O_j\in \OPT}|O_j|}
+=\frac{c(\OPT)}{\sum_{O_j\in \OPT}|O_j|}
+\leq\frac{c(\OPT)}{n}.
+\end{aligned}&&
+\end{flalign*}
+\endgroup
+\end{proof}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{theorem}[Approximation ratio of greedy set cover]
+\[
+\mathsf{GreedySetCover}\text{ is an }H_n\text{-approximation algorithm}.
+\]
+\[
+n:=|U|.
+\]
+\end{theorem}
+\begin{proof}
+\setlength{\jot}{2pt}
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+\setlength{\abovedisplayshortskip}{3pt}
+\setlength{\belowdisplayshortskip}{3pt}
+\begingroup\raggedright
+\noindent\(\mathsf{GreedySetCover}\) is an \(H_n\)-approximation algorithm
+\(\overset{\text{Def.~\ref{def:alpha-approximation}, Thm.~\ref{thm:greedy-efficient}}}{\iff}
+\forall I\in\mathcal I:\)
+\mbox{\(c\bigl(\mathcal A(I)\bigr)
+\leq H_n\,c\bigl(\OPT(I)\bigr)\)}.\par
+\endgroup
+\begin{flalign*}
+&\begin{aligned}
+&\text{Fix arbitrary }I=(U,S,w)\in\mathcal I.\\[3pt]
+&\text{Strong induction on }n.\\[3pt]
+&\text{1. Base case: }n=1\ \Longrightarrow\ \forall S_j\in S:\ S_j\neq\varnothing\ \Longrightarrow\ S_j=U,\\
+&c\bigl(\mathcal A(I)\bigr)=\min_{S_j\in S:\ S_j\neq\varnothing}w(S_j)
+=c\bigl(\OPT(I)\bigr)
+=H_1\,c\bigl(\OPT(I)\bigr).
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&\text{2. Inductive step: }n\geq2.\\[3pt]
+&S_i\in\operatorname*{arg\,min}_{S_j\in S}\ppi(S_j)\qquad\text{(first greedy set)},\\
+\end{aligned}&&
+\end{flalign*}
+
+\begin{flalign*}
+&\begin{aligned}
+&k:=|S_i|\geq1,\qquad U':=U\setminus S_i,\qquad |U'|=n-k,\\
+&S':=\{\,S_j':=S_j\setminus S_i:S_j\in S\,\},\qquad
+w(S_j'):=w(S_j),\qquad I':=(U',S',w),\\
+&C':=c\bigl(\mathsf{GreedySetCover}(U',S',w)\bigr).
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&c\bigl(\mathcal A(I)\bigr)
+=w(S_i)+C'\\
+&\overset{\text{Def. of }\ppi}{=}k\,\ppi(S_i)+C'\\
+&\leq k\,\ppi(S_i)+H_{n-k}c(\OPT)\\
+&\overset{\text{Lemma~\ref{lem:greedy-price}}}{\leq} k\,\frac{c(\OPT)}{n}+H_{n-k}c(\OPT)
+=\left(\frac{k}{n}+H_{n-k}\right)c(\OPT)
+\leq H_nc(\OPT).
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&n=k\ \Longrightarrow\ C'=0,\\
+&n>k:\quad \underbrace{C'\leq H_{n-k}c(\OPT(I'))}_{\mathrm{IH}}
+\leq H_{n-k}c(\OPT).
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\frac{k}{n}=\sum_{\ell=n-k+1}^{n}\frac1n
+\leq\sum_{\ell=n-k+1}^{n}\frac1\ell
+=H_n-H_{n-k}.&&
+\end{flalign*}
+
+\begin{flalign*}
+&\mathrm{IH}:\text{ induction hypothesis}.&&
+\end{flalign*}
+\end{proof}
+\end{minipage}\par
+
+
+\noindent\begin{minipage}{\linewidth}
+\begin{example}[Tight bound for greedy set cover]
+\setlength{\jot}{2pt}
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+\setlength{\abovedisplayshortskip}{3pt}
+\setlength{\belowdisplayshortskip}{3pt}
+\begin{flalign*}
+&\begin{aligned}
+&k\in\mathbb N_{\geq2},\qquad
+\forall i\in\{1,\ldots,k\}:\quad |A_i|=|B_i|=2^{i-1},\qquad S_i:=A_i\cup B_i,\\
+&\forall i:\ A_i\cap B_i=\varnothing,\qquad
+\forall i\neq j:\ S_i\cap S_j=\varnothing,\\
+&U:=\bigcup_{i=1}^{k}S_i,\qquad
+n:=|U|=\sum_{i=1}^{k}2^i=2(2^k-1).
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&S_{k+1}:=\bigcup_{i=1}^{k}A_i,\qquad S_{k+2}:=\bigcup_{i=1}^{k}B_i,\\
+&S_{k+1}\cap S_{k+2}=\varnothing\ \land\ S_{k+1}\cup S_{k+2}=U,\\
+&S:=\{S_1,\ldots,S_{k+2}\},\qquad
+\forall S_i\in S:\ w(S_i):=1,\qquad I_k:=(U,S,w).
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&j\in\{1,\ldots,k\},\qquad U_j:=\bigcup_{i=1}^{j}S_i,\qquad |U_j|=2(2^j-1),\\
+&|S_j\cap U_j|=2^j,\qquad
+|S_{k+1}\cap U_j|=|S_{k+2}\cap U_j|=\sum_{i=1}^{j}2^{i-1}=2^j-1,\\
+&\forall i\leq j:\quad
+\ppi(S_j\cap U_j)=\frac1{2^j}\leq\frac1{2^i}=\ppi(S_i\cap U_j),\\
+&\ppi(S_j\cap U_j)=\frac1{2^j}<\frac1{2^j-1}
+=\ppi(S_{k+1}\cap U_j)=\ppi(S_{k+2}\cap U_j),\\
+&\forall i>j,\ i\leq k:\quad S_i\cap U_j=\varnothing\ \Longrightarrow\ \ppi(S_i\cap U_j)=\infty.
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&S_k\longrightarrow S_{k-1}\longrightarrow\cdots\longrightarrow S_1,\\
+&\mathcal A(I_k)=\{S_1,\ldots,S_k\},\qquad c\bigl(\mathcal A(I_k)\bigr)=k.
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\begin{aligned}
+&\max_{S_i\in S}|S_i|=2^k<2(2^k-1)=n
+\ \Longrightarrow\ c\bigl(\OPT(I_k)\bigr)\geq2,\\
+&S_{k+1}\cup S_{k+2}=U\ \land\ c(\{S_{k+1},S_{k+2}\})=2
+\ \Longrightarrow\ c\bigl(\OPT(I_k)\bigr)=2.
+\end{aligned}&&
+\end{flalign*}
+\begin{flalign*}
+&\frac{c\bigl(\mathcal A(I_k)\bigr)}{c\bigl(\OPT(I_k)\bigr)}
+=\frac{k}{2}=\frac12\log_2\!\left(\frac n2+1\right)
+=\Theta(\log n)=\Theta(H_n).&&
+\end{flalign*}
+\end{example}
+\end{minipage}\par
+
+
+\noindent\begin{minipage}{\linewidth}
+\begin{theorem}[Hardness of approximating set cover (Dinur--Steurer, 2014)]
+\begin{flalign*}
+&\forall\varepsilon\in(0,1):\quad
+(1-\varepsilon)\ln|U|\text{-approximation of }\Pi_{\text{minimum set cover}}\text{ is NP-hard}.&&
+\end{flalign*}
+\end{theorem}
+\begin{proof}
+\end{proof}
+\end{minipage}\par
+
+\subsection*{Questions}
+\addcontentsline{toc}{subsection}{Questions}
+\begin{enumerate}
+\item Should Definition~1.1 explicitly define $\alpha:\mathcal I\to\mathbb R_{\geq1}$
+and use $\alpha(I)$ in the approximation inequalities, allowing instance-dependent
+factors such as $\alpha(I)=H_{|U|}$ and constant factors as constant functions
+$\alpha(I)=a$ for all $I$?
+\item Should an $\alpha$-approximation algorithm be required to be efficient,
+i.e., run in polynomial time? The introduction of the lecture notes describes
+approximation algorithms as efficient, but Definition~1.1 only states the
+approximation inequality.
+\item Should the minimum set cover problem require $|U|\geq1$ so that the
+$H_n$-approximation guarantee always has $H_n\geq1$? The proof of
+Theorem~1.3 in the lecture notes uses $n=0$ as its base case, but $H_0=0$,
+whereas approximation factors are normally required to satisfy $\alpha\geq1$.
+If the empty universe is allowed, how should the approximation factor be
+stated? Does Definition~1.1 allow $\alpha$ to depend on $n$, with
+$\alpha(0)=1$ and $\alpha(n)=H_n$ for $n\geq1$, or should the empty case be
+handled separately from the approximation guarantee?
+\end{enumerate}
+
+\clearpage
+\section{Approximation schemes}
+
+\noindent\begin{minipage}{\linewidth}
+\begin{definition}[Polynomial time approximation scheme (PTAS)]
+\begin{flalign*}
+&\begin{aligned}
+&\mathcal A\text{ is a PTAS for }\Pi_{\mathrm{optimization}}\ \iff\\[3pt]
+&\forall\varepsilon>0\ \exists q_\varepsilon\text{ polynomial}\ \forall I\in\mathcal I:\\[3pt]
+&\quad\mathcal A_\varepsilon(I)\text{ terminates and is feasible for }I\ \land\\
+&\quad\begin{cases}
+c\bigl(\mathcal A_\varepsilon(I)\bigr)\leq(1+\varepsilon)c\bigl(\OPT(I)\bigr), & \text{minimization},\\[3pt]
+c\bigl(\mathcal A_\varepsilon(I)\bigr)\geq(1-\varepsilon)c\bigl(\OPT(I)\bigr), & \text{maximization}
+\end{cases}\ \land\\[3pt]
+&\quad\mathrm{time}_{\mathcal A_\varepsilon}(I)\leq q_\varepsilon(|I|).
+\end{aligned}&&
+\end{flalign*}
+\[
+\Pi_{\mathrm{optimization}}:=(\mathcal I,\mathcal S),\qquad
+\OPT(I)\in\mathcal S_I.
+\]
+\[
+\forall\varepsilon>0:\quad\mathcal A_\varepsilon:\mathcal I\to\mathcal S.
+\]
+
+\[
+\begin{aligned}
+\varepsilon&:\text{ approximation parameter (fixed)},\\
+\mathcal A_\varepsilon&:\text{ algorithm for fixed }\varepsilon,\\
+q_\varepsilon&:\text{ polynomial in }|I|\text{ whose coefficients and degree may depend on }\varepsilon.
+\end{aligned}
+\]
+\end{definition}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{definition}[Fully polynomial time approximation scheme (FPTAS)]
+\begin{flalign*}
+&\begin{aligned}
+&\mathcal A\text{ is an FPTAS for }\Pi_{\mathrm{optimization}}\ \iff\\[3pt]
+&\exists q\text{ polynomial}\ \forall\varepsilon>0\ \forall I\in\mathcal I:\\[3pt]
+&\quad\mathcal A(I,\varepsilon)\text{ terminates and is feasible for }I\ \land\\
+&\quad\begin{cases}
+c\bigl(\mathcal A(I,\varepsilon)\bigr)\leq(1+\varepsilon)c\bigl(\OPT(I)\bigr), & \text{minimization},\\[3pt]
+c\bigl(\mathcal A(I,\varepsilon)\bigr)\geq(1-\varepsilon)c\bigl(\OPT(I)\bigr), & \text{maximization}
+\end{cases}\ \land\\[3pt]
+&\quad\mathrm{time}_{\mathcal A}(I,\varepsilon)\leq q\!\left(|I|,\frac1\varepsilon\right).
+\end{aligned}&&
+\end{flalign*}
+\[
+\Pi_{\mathrm{optimization}}:=(\mathcal I,\mathcal S),\qquad\OPT(I)\in\mathcal S_I.
+\]
+\[
+\mathcal A:\mathcal I\times\mathbb R_{>0}\to\mathcal S.
+\]
+\[
+\begin{aligned}
+\varepsilon&:\text{ approximation parameter (input)},\\
+q&:\text{ one fixed polynomial in }|I|\text{ and }1/\varepsilon.
+\end{aligned}
+\]
+\end{definition}
+\end{minipage}\par
+
+\noindent\begin{minipage}{\linewidth}
+\begin{example}[PTAS versus FPTAS running time]
+\begin{flalign*}
+&\begin{aligned}
+&\mathrm{time}_{\mathcal A_\varepsilon}(I)\in O\!\left(|I|^{1/\varepsilon}\right).\\[3pt]
+&\varepsilon>0\text{ fixed}:\quad |I|^{1/\varepsilon}\in\poly(|I|)
+\quad\Longrightarrow\quad\text{PTAS running-time bound}.\\[3pt]
+&|I|=2:\quad |I|^{1/\varepsilon}=2^{1/\varepsilon}\notin\poly(1/\varepsilon)
+\quad\Longrightarrow\quad\text{not an FPTAS running-time bound}.
+\end{aligned}&&
+\end{flalign*}
+\end{example}
+\end{minipage}\par
+
+\subsection*{Questions}
+\addcontentsline{toc}{subsection}{Questions}
+\begin{enumerate}
+\item The introduction to Chapter~2 states that the greedy algorithms from
+Chapter~1 approximate the optimum within a constant factor, including minimum
+set cover. Is this a typo? The guarantee for greedy set cover is $H_n=\Theta(\log n)$,
+where $n=|U|$, so its approximation factor is not constant. Should the statement
+distinguish this logarithmic factor from the constant factors for matching
+and vertex cover?
+\item For maximization, should the PTAS and FPTAS guarantee be defined as
+$c(\mathcal A(I,\varepsilon))\geq(1-\varepsilon)c(\OPT(I))$?
+How does this relate to Definition~1.1, which uses
+$c(\OPT(I))\leq\alpha\,c(\mathcal A(I))$?
+Is the intended correspondence $\alpha=1/(1-\varepsilon)$ for
+$0<\varepsilon<1$, rather than $\alpha=1+\varepsilon$?
+\end{enumerate}
+
+\clearpage
+\section*{General questions}
+\addcontentsline{toc}{section}{General questions}
+\begin{enumerate}
+\item When the lecture notes state a theorem but refer to a paper or another
+source for its proof, are we expected to study and be able to reproduce that
+proof, or is it sufficient to know the theorem's statement and how to use it?
+\end{enumerate}
 
 \end{document}

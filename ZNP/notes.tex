@@ -1,0 +1,299 @@
+% Zero-Knowledge Proofs (263-4665-00L) -- lecture notes
+% Build: pdflatex notes.tex
+\documentclass[11pt,a4paper]{article}
+
+% ---------- layout & fonts ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+% ---------- math ----------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{bbm}
+
+% ---------- theorem environments ----------
+\usepackage{amsthm}
+\usepackage{thmtools}
+
+% ---------- boxes, colours, links ----------
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+\definecolor{defblue}{HTML}{1565C0}
+\definecolor{thmpurple}{HTML}{6A1B9A}
+\definecolor{remgray}{HTML}{546E7A}
+
+% ---------- theorem kit (shared counter, coloured boxes) ----------
+\declaretheoremstyle[
+  headfont=\bfseries\color{defblue!70!black},
+  notefont=\bfseries, notebraces={(}{)}, headpunct={.}, postheadspace=0.5em,
+  bodyfont=\normalfont, spaceabove=0.7em, spacebelow=0.7em,
+  preheadhook={\begin{tcolorbox}[enhanced, breakable, colback=defblue!4,
+    colframe=defblue!60!black, boxrule=0.7pt, arc=2pt,
+    left=6pt, right=6pt, top=5pt, bottom=5pt]},
+  postfoothook={\end{tcolorbox}},
+]{defbox}
+
+\declaretheoremstyle[
+  headfont=\bfseries\color{thmpurple!70!black},
+  notefont=\bfseries, notebraces={(}{)}, headpunct={.}, postheadspace=0.5em,
+  bodyfont=\normalfont, spaceabove=0.7em, spacebelow=0.7em,
+  preheadhook={\begin{tcolorbox}[enhanced, breakable, colback=thmpurple!4,
+    colframe=thmpurple!60!black, boxrule=0.7pt, arc=2pt,
+    left=6pt, right=6pt, top=5pt, bottom=5pt]},
+  postfoothook={\end{tcolorbox}},
+]{thmbox}
+
+\declaretheoremstyle[
+  headfont=\bfseries\color{remgray!80!black},
+  notefont=\bfseries, notebraces={(}{)}, headpunct={.}, postheadspace=0.5em,
+  bodyfont=\normalfont, spaceabove=0.7em, spacebelow=0.7em,
+  preheadhook={\begin{tcolorbox}[enhanced, breakable, colback=remgray!5,
+    colframe=remgray!55!black, boxrule=0.7pt, arc=2pt,
+    left=6pt, right=6pt, top=5pt, bottom=5pt]},
+  postfoothook={\end{tcolorbox}},
+]{rembox}
+
+\declaretheorem[numberwithin=section, style=defbox]{definition}
+\declaretheorem[numberwithin=section, style=defbox, sibling=definition]{example}
+\declaretheorem[numberwithin=section, style=defbox, sibling=definition]{construction}
+\declaretheorem[numberwithin=section, style=thmbox, sibling=definition]{theorem}
+\declaretheorem[numberwithin=section, style=thmbox, sibling=definition]{proposition}
+\declaretheorem[numberwithin=section, style=thmbox, sibling=definition]{lemma}
+\declaretheorem[numberwithin=section, style=thmbox, sibling=definition]{corollary}
+\declaretheorem[numberwithin=section, style=thmbox, sibling=definition]{claim}
+\declaretheorem[numberwithin=section, style=thmbox, sibling=definition]{fact}
+\declaretheorem[numberwithin=section, style=rembox, sibling=definition]{remark}
+
+% ---------- prover/verifier protocol float ----------
+\newtcolorbox{protocol}[1][]{
+  colback=blue!3, colframe=blue!40!black, boxrule=0.6pt, arc=2pt,
+  left=5pt, right=5pt, top=4pt, bottom=4pt,
+  fonttitle=\bfseries, title={Protocol #1}
+}
+
+% ---------- complexity-class box ----------
+\newtcolorbox{complexityclass}[1][]{
+  colback=green!3, colframe=green!35!black, boxrule=0.6pt, arc=2pt,
+  left=5pt, right=5pt, top=4pt, bottom=4pt,
+  fonttitle=\bfseries, title={Complexity class #1}
+}
+
+% ---------- macros ----------
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\bits}{\{0,1\}}
+\newcommand{\lang}{\mathcal{L}}
+\newcommand{\rel}{\mathcal{R}}
+\newcommand{\Perm}{\mathrm{Perm}}
+\newcommand{\concat}{\,\|\,}
+\newcommand{\samp}{\overset{\$}{\leftarrow}}
+\newcommand{\iso}{\cong}
+\newcommand{\niso}{\ncong}
+\DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\polylog}{polylog}
+\DeclareMathOperator{\negl}{negl}
+\DeclareMathOperator{\View}{View}
+
+\title{\vspace{-1.5em}Zero-Knowledge Proofs\\[0.3em]\large 263-4665-00L, ETH Z\"urich}
+\author{Lecture notes}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\bigskip
+
+\section{Lecture 1 --- Interactive proofs and zero-knowledge}
+
+\begin{definition}[Alphabet]
+\[
+  \Sigma \coloneqq \bits .
+\]
+\end{definition}
+
+\begin{definition}[Statement]
+\[
+  x \in \Sigma^{*} .
+\]
+\end{definition}
+
+\begin{definition}[Language]
+\[
+  \lang \subseteq \Sigma^{*} .
+\]
+\end{definition}
+
+\begin{definition}[Complexity class]
+\[
+  \{\lang\} .
+\]
+\end{definition}
+
+\begin{definition}[Deterministic Turing machine]
+\begin{gather*}
+  \delta : Q\times\Gamma \to Q\times\Gamma\times\{L,R\},\\
+  |Q| < \infty,\quad
+  \Gamma \supseteq \Sigma,\quad
+  \sqcup \in \Gamma\setminus\Sigma,\quad
+  q_0, q_{\mathrm{acc}}, q_{\mathrm{rej}} \in Q,\\
+  M \coloneqq (Q,\ \Sigma,\ \Gamma,\ \delta,\ q_0,\ q_{\mathrm{acc}},\ q_{\mathrm{rej}}).
+\end{gather*}
+\end{definition}
+
+\begin{definition}[Decision algorithm, efficiency]
+A \emph{decision algorithm} is a DTM $M:\Sigma^{*}\to\bits$ that halts on every input and \emph{decides} $\lang$ if
+\[
+  \forall x \in \Sigma^{*},\quad M(x)=1 \iff x\in\lang .
+\]
+$M$ is \emph{efficient} (polynomial time) if
+\[
+  \exists\, q \in \poly :\quad \forall x \in \Sigma^{*},\ \ \mathrm{time}_M(x) \le q(|x|) .
+\]
+\end{definition}
+
+\begin{definition}[$\mathsf{P}$]
+\[
+  \mathsf{P} \coloneqq \bigl\{\,\lang \mid \exists\, M,\, q \;\;
+  \forall x \in \Sigma^{*},\;
+  M(x)=1 \iff x\in\lang,\;\; \mathrm{time}_M(x)\le q(|x|)\,\bigr\}.
+\]
+\end{definition}
+
+\begin{definition}[$\mathsf{NP}$]
+\begin{align*}
+  \mathsf{NP} \coloneqq \Bigl\{\, \lang \mid \exists\, \rel_\lang,\, q:\ 
+  &\forall x\in\lang\ \exists w:\ |w|\le q(|x|),\ (x,w)\in\rel_\lang\\
+  &\wedge\ \forall x\notin\lang\ \nexists w:\ (x,w)\in\rel_\lang
+  \ \wedge\ \rel_\lang \in \mathsf{P} \,\Bigr\}.
+\end{align*}
+$w$ is the \emph{witness} of $x$.
+\end{definition}
+
+\begin{remark}[Traditional proofs]
+\[
+  \lang\in\mathsf{P}\ \Rightarrow\ x\in\lang \text{ needs no proof};
+  \qquad
+  \lang\in\mathsf{NP}\ \Rightarrow\ x\in\lang \iff \exists w:\ (x,w)\in\rel_\lang .
+\]
+\end{remark}
+
+\begin{definition}[Interactive algorithms]
+$P,V:\Sigma^{*}\to\Sigma^{*}$, $k:\Sigma^{*}\to\N$, coins $r,s$:
+\[
+  a_1 = P(x,r),\quad a_2 = V(x,a_1,s),\quad a_3 = P(x,a_1,a_2,r),\ \dots
+\]
+\[
+  \langle P(r),V(s)\rangle(x) = a_{k(x)},
+  \qquad
+  \text{transcript} = (x,a_1,\dots,a_{k(x)}).
+\]
+\end{definition}
+
+\begin{definition}[$\mathsf{IP}$]
+$\lang\in\mathsf{IP} \iff \exists P,\, V$ with $V$ efficient ($\poly(|x|)$) and
+\[
+  \underbrace{\forall x\in\lang:\ \Pr_{r,s}\!\bigl[\langle P(r),V(s)\rangle(x)=1\bigr]\ge \tfrac34}_{\text{completeness}}
+  \;\wedge\;
+  \underbrace{\forall x\notin\lang,\ \forall P^*:\ \Pr_{r,s}\!\bigl[\langle P^*(r),V(s)\rangle(x)=1\bigr]\le \tfrac12}_{\text{soundness}} .
+\]
+$(P,V)$ is an interactive proof system for $\lang$; $P$ may be unbounded.
+\end{definition}
+
+\begin{definition}[Graph isomorphism]
+\begin{align*}
+  G_0 \iso G_1 &\iff \exists \pi\in\Perm(n):\ G_0=\pi(G_1),\\
+  \lang_{GNI} &\coloneqq \bigl\{(G_0,G_1): G_0,G_1\subseteq[n]^2,\ G_0\niso G_1\bigr\}.
+\end{align*}
+\end{definition}
+
+\begin{protocol}[$\lang_{GNI}$]
+\begin{tabular}{@{}p{0.46\textwidth}p{0.46\textwidth}@{}}
+$P(G_0,G_1)$ & $V(G_0,G_1)$\\[2pt]
+ & $b\samp\bits,\ \ \pi\samp\Perm(n),\ \ H\coloneqq\pi(G_b)$\\
+ & \hfill$\xrightarrow{\;H\;}$\\[2pt]
+$B:\ H\iso G_B$ \ (try all perms) & \\
+\hfill$\xleftarrow{\;B\;}$ & output $(B=b)$\\
+\end{tabular}
+\end{protocol}
+
+\noindent\textbf{Analysis.}\quad
+Completeness ($G_0\niso G_1$): $H\iso G_0 \wedge H\iso G_1 \Rightarrow G_0\iso G_1$\#, so $H$ gives a unique $B=b$. \quad
+Soundness ($G_0\iso G_1$): $\pi(G_0)\sim\pi(G_1) \Rightarrow B\perp b \Rightarrow \Pr[B=b]=\tfrac12$.
+
+\begin{definition}[Algorithmic knowledge]
+\[
+  \mathrm{knowledge} \coloneqq \{\text{anything an algorithm computes efficiently}\}.
+\]
+\end{definition}
+
+\begin{definition}[Perfect zero-knowledge]
+\begin{align*}
+  \View_V^P &\coloneqq (x,s,a_1,\dots,a_{k(x)}),\\
+  (P,V)\ \text{perfect ZK} &\iff \forall V^*\ \exists S:\ \forall x\in\lang,\ \View_{V^*}^P = S(V^*,x).
+\end{align*}
+$V^*$ = malicious verifier; $S$ = efficient simulator without a witness.
+\end{definition}
+
+\begin{definition}[Graph isomorphism]
+\[
+  \lang_{GI} \coloneqq \{(G_0,G_1): G_0\iso G_1\},
+  \quad
+  \rel_{GI} \coloneqq \{(G_0,G_1,\pi): G_0=\pi(G_1)\} \in\mathsf{P}
+  \Rightarrow \lang_{GI}\in\mathsf{NP}.
+\]
+\end{definition}
+
+\begin{protocol}[$\lang_{GI}$, perfect ZK]
+\begin{tabular}{@{}p{0.46\textwidth}p{0.46\textwidth}@{}}
+$P(G_0,G_1)$ & $V(G_0,G_1)$\\[2pt]
+$\sigma\samp\Perm(n),\ \ H\coloneqq\sigma(G_0)$ & \\
+ & \hfill$\xleftarrow{\;H\;}$\\[2pt]
+$\tau\coloneqq\begin{cases}\sigma, & b=0\\ \sigma\circ\pi, & b=1\end{cases}$
+  & $b\samp\bits$\\
+\hfill$\xrightarrow{\;\tau\;}$ & $(H=\tau(G_b))$\\
+\end{tabular}
+\end{protocol}
+
+\noindent\textbf{Analysis.}\quad
+Completeness: $b=0\Rightarrow\tau(G_0)=H$, \ $b=1\Rightarrow\tau(G_1)=\sigma(\pi(G_1))=H$. \quad
+Soundness ($G_0\niso G_1$): $G_b\iso H$ for $\le 1$ of $b\in\bits \Rightarrow \Pr_{\,b}\!\bigl[\text{accept}\bigr]\le\tfrac12$.
+
+\begin{protocol}[$S(V^*,G_0,G_1)$]
+\begin{tabular}{@{}p{0.62\textwidth}p{0.32\textwidth}@{}}
+$\tau\samp\Perm(n),\ \ B\samp\bits,\ \ H\coloneqq\tau(G_B)$ & \\
+ & \hfill$b\leftarrow V^*(G_0,G_1,H)$\\[2pt]
+$b\neq B \Rightarrow$ restart & \\
+output $(G_0,G_1,\tau,H,b)$ & \\
+\end{tabular}
+\end{protocol}
+
+\noindent\textbf{Why valid.}\quad
+$S$ guesses $b$ backwards; efficient since $V^*$ is and the loop clears in $\mathbb{E}=2$ tries; $G_0\iso G_1 \Rightarrow \tau(G_0)\sim\tau(G_1)$, so $(\tau,H,b)$ matches the real view.
+
+\subsection*{Efficiency targets}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+& $P$-time / proof & \\
+\midrule
+intro.\ (defs) & $\poly(N),\ \poly(N)$ & (not ZK)\\
+sigma protocols & $\poly(N),\ \poly(N)$ & ZK\\
+short arguments & $\poly(N),\ \polylog(N)$ & ZK\\
+non-interactive & $O(1),\ O(1)$ & ZK\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

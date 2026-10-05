@@ -1,0 +1,77 @@
+\documentclass[12pt,a4paper]{article}
+\input{preamble}
+
+\title{Advanced Encryption Schemes\\\large Klevis Imeri Lecture Notes}
+\author{}
+\date{Autumn 2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Lecture 1}
+
+\begin{definition}[Probabilistic polynomial-time algorithm]
+\[
+\mathrm{PPT}(A) \iff \exists p\in\poly\ \ \forall x\in\{0,1\}^{*}\ \ \forall r:\ \mathrm{time}_A(x;r)\le p(|x|).
+\]
+\end{definition}
+
+\begin{definition}[Negligible function]
+\[
+\mu:\mathbb{N}\to\mathbb{R}\text{ negligible}
+\ \iff\ 
+\forall c\in\mathbb{N}_{>0}\ \exists \lambda_0\in\mathbb{N}\ \forall \lambda\ge\lambda_0:
+\quad |\mu(\lambda)|<\frac{1}{\lambda^c}.
+\]
+\end{definition}
+
+\begin{definition}[Public key encryption scheme]
+\[
+\Pi := (\mathsf{Gen},\mathsf{Enc},\mathsf{Dec}).
+\]
+\[
+\mathrm{PKE}(\Pi)\iff
+\begin{cases}
+\mathrm{PPT}(\mathsf{Gen})\land
+\mathrm{PPT}(\mathsf{Enc})\land
+\mathrm{PPT}(\mathsf{Dec}),\\[3pt]
+\forall\lambda\in\mathbb{N}_{>0}:\\[2pt]
+\quad\mathsf{Gen}(1^\lambda)\in
+\mathcal{K}_{\mathrm{pub},\lambda}\times\mathcal{K}_{\mathrm{sec},\lambda},\\[3pt]
+\quad\forall pk\in\mathcal{K}_{\mathrm{pub},\lambda}\ \forall m\in\mathcal{M}_\lambda:\\
+\qquad\mathsf{Enc}(pk,m)\in\mathcal{C}_\lambda,\\[3pt]
+\quad\forall sk\in\mathcal{K}_{\mathrm{sec},\lambda}\ \forall ct\in\mathcal{C}_\lambda:\\
+\qquad\mathsf{Dec}(sk,ct)\in\mathcal{M}_\lambda\sqcup\{\bot\}.
+\end{cases}
+\]
+\[
+\begin{aligned}
+\mathsf{Gen},\mathsf{Enc},\mathsf{Dec}&:\text{ algorithms},\\
+\lambda&:\text{ security parameter},\\
+\mathcal{K}_{\mathrm{pub},\lambda},\mathcal{K}_{\mathrm{sec},\lambda}
+&:\text{ public and secret key spaces},\\
+\mathcal{M}_{\lambda},\mathcal{C}_{\lambda}
+&:\text{ message and ciphertext spaces},\\
+\bot&:\text{ decryption failure},\qquad
+\sqcup:\text{ disjoint union}.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{definition}[Perfect correctness]
+\[
+\mathrm{PerfectCorrect}(\Pi)\iff
+\forall\lambda\in\mathbb{N}_{>0}\ 
+\forall(pk,sk)\in\mathsf{Gen}(1^\lambda)\ 
+\forall m\in\mathcal{M}_\lambda:
+\]
+\[
+\Pr\!\left[\mathsf{Dec}(sk,\mathsf{Enc}(pk,m))=m\right]=1.
+\]
+\end{definition}
+
+\section{Lecture 2}
+
+\end{document}
