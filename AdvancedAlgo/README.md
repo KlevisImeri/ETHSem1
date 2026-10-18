@@ -6,6 +6,8 @@
 - Define every symbol before its first use.
 - Use text only when notation alone would be ambiguous or when an essential qualification cannot be expressed clearly with symbols.
 - Keep definitions and proofs compact.
+- Append new questions after the last existing question in the relevant Questions section; preserve the order of existing questions.
+- Write instance inputs as `I = {S = {...}, ...}`, with the item set and all other instance data inside the outer braces.
 
 ## Compilation
 

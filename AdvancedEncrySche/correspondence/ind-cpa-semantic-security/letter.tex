@@ -1,0 +1,239 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx,pdflscape}
+\usepackage{xcolor}
+
+\setlist{nosep}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.4em}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{problem}{Exercise}[section]
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newenvironment{solution}{\begin{proof}[Solution]}{\end{proof}}
+
+\DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\negl}{negl}
+\DeclareMathOperator{\Adv}{Adv}
+
+\begin{document}
+\textbf{To:} Dr. Kristina Host\'{a}kov\'{a},
+\href{mailto:kristina.hostakova@inf.ethz.ch}{kristina.hostakova@inf.ethz.ch}\\
+\textbf{Subject:} A fully direct proof using a reduction
+
+Dear Dr. Host\'{a}kov\'{a},
+
+Below is a fully direct proof that IND-CPA security implies semantic security,
+using a reduction. I also include the alternative final
+step by contraposition from Lecture 2, alongside the direct conclusion, to
+compare the two presentations.
+
+I previously had the impression that using a reduction necessarily introduced
+a contrapositive step in a proof. Writing out the argument below helped me
+understand the distinction. My understanding is that a reduction constructs
+an algorithm using another algorithm as a subroutine, providing the
+interaction that the subroutine expects. Whether we use the resulting
+implication directly or by contraposition is a separate choice in presenting
+the proof.
+
+Could you let me know whether this understanding is correct?
+
+Best regards,\\
+Klevis
+
+\medskip\hrule\medskip
+\setcounter{section}{1}
+\setcounter{theorem}{13}
+\begin{theorem}[Semantic security $\iff$ IND-CPA]
+\[
+\mathrm{SemanticSecure}(\Pi)
+\iff\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi).
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ public key encryption scheme}.
+\end{aligned}
+\]
+\end{theorem}
+
+\begin{proof}[By direct proof: IND-CPA $\Longrightarrow$ semantic security]
+\leavevmode\par\smallskip\hrule\medskip
+\[
+\begin{aligned}
+\text{Goal:}\quad
+&\left[\begin{gathered}
+\forall\text{ PPT }D\;
+\forall\lambda\in\mathbb{N}:\\
+\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,D}(\lambda)\leq\negl(\lambda)
+\end{gathered}\right]\\
+&\quad\Longrightarrow\quad
+\left[\begin{gathered}
+\forall\text{ PPT }A\;\exists\text{ PPT }A'\;
+\forall\text{ PPT }\mathsf{Samp}\;\forall\text{ PT }f:\\
+\forall\lambda\in\mathbb{N}:\quad
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|\leq\negl(\lambda)
+\end{gathered}\right].
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\text{Idea:}\quad
+&\left[\begin{gathered}
+\exists\text{ PPT }D\;\exists\text{ polynomial }p\;
+\forall\lambda\in\mathbb{N}:\\
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+\leq p(\lambda)\,\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,D}(\lambda)
++\negl(\lambda)
+\end{gathered}\right]\\
+&\quad\overset{\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi)}{\Longrightarrow}\quad
+|\epsilon_A-\epsilon_{A'}|\text{ negligible}.
+\end{aligned}
+\]
+\renewcommand{\qedsymbol}{}
+\[
+\forall\text{ PPT }D:\quad
+\underbrace{2\left|P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)-\frac12\right|}_{\mathrm{Adv}_{\Pi,D}^{\mathrm{IND\text{-}CPA}}(\lambda)}
+\overset{\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi)}{\leq}\negl(\lambda).
+\tag{2}\label{eq:indcpa-negligible-bound}
+\]
+\[
+\text{Idea 2:}\quad\text{Construct the IND-CPA game for Idea 1.}
+\]
+We want to construct an IND-CPA attacker $D$ so that both
+$\epsilon_A$ and $\epsilon_{A'}$ appear in its winning probability.
+This would let us relate their difference to $D$'s advantage, as required
+by Idea 1. The IND-CPA game already provides a challenge bit $b$ with
+two possible values. We use these two branches to include both executions
+in the same game. When $b=0$, this runs $A$ on an
+encryption of $m$, giving the real execution. When $b=1$, it runs $A$ on
+an encryption of $0^{|m|}$, which is exactly how $A'$ is defined below.
+Thus the probabilities of correctly computing $f(m,h)$ in the two branches
+are $\epsilon_A$ and $\epsilon_{A'}$. We can then use them to calculate
+$D$'s winning probability and advantage in this one IND-CPA game,
+and thereby bound the semantic-security gap.
+\[
+\forall\text{ PPT }A:\quad
+A'(pk,h,\ell):=A(pk,h,\mathsf{Enc}(pk,0^\ell)).
+\]
+\[
+\begin{aligned}
+A'&\text{ depends only on }A\text{ and }\Pi,\\
+\forall\text{ PPT }\mathsf{Samp}\;\forall\text{ PT }f:\quad
+D&=(D')^A\text{ uses the chosen }\mathsf{Samp}\text{ and }f.
+\end{aligned}
+\]
+\par\pagebreak[0]
+\begin{samepage}
+\begingroup\small
+\[
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{IND-CPA challenger}}&\multicolumn{3}{c}{D=(D')^A}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}D'&&A\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{14pt}D_1}\\[3pt]
+\cline{3-5}
+(pk,sk)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk\ }&&&\\
+&&(m,h)\leftarrow\mathsf{Samp}(pk)&&\\
+&&m_0:=m,\quad m_1:=0^{|m|}&&\\
+&&m_0\ne m_1&&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{14pt}D_2}\\[3pt]
+\cline{3-5}
+b\leftarrow_{\$}\{0,1\}&&&&\\
+ct\leftarrow\mathsf{Enc}(pk,m_b)
+&\xrightarrow{\ ct\ }&&&\\
+&&&\xrightarrow{\ pk,h,ct\ }&\\
+&&&&x\leftarrow A(pk,h,ct)\\
+&&&\xleftarrow{\ x\ }&\\
+&&b^*:=\begin{cases}
+0,&x=f(m,h),\\
+1,&x\ne f(m,h)
+\end{cases}&&\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ \mathbf{1}[b^*=b]&&&&\\[3pt]
+\cline{3-5}
+\end{array}
+\]
+\endgroup
+\end{samepage}
+\[
+\begin{aligned}
+\Pr[D\text{ wins}\mid b=0]
+&=\Pr[A(pk,h,\mathsf{Enc}(pk,m))=f(m,h)]\\
+&=\epsilon_A(\lambda),\\[4pt]
+\Pr[D\text{ wins}\mid b=1]
+&=\Pr[A'(pk,h,|m|)\ne f(m,h)]\\
+&=1-\Pr[A'(pk,h,|m|)=f(m,h)]\\
+&=1-\epsilon_{A'}(\lambda).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)
+&=\Pr[D\text{ wins}\mid b=0]\Pr[b=0]\\
+&\quad+\Pr[D\text{ wins}\mid b=1]\Pr[b=1]\\
+&=\frac12\epsilon_A(\lambda)+\frac12(1-\epsilon_{A'}(\lambda))\\
+&=\frac12+\frac12\bigl(\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)\bigr).
+\end{aligned}
+\]
+\par\medskip\noindent
+\begin{minipage}[t][5.6cm][t]{0.48\linewidth}
+\vspace{0pt}
+{\small\itshape Direct conclusion\par}
+\smallskip\hrule\medskip
+\centering
+\resizebox{\linewidth}{!}{$\displaystyle
+\begin{aligned}
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+&=2\left|P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)-\frac12\right|\\
+&\overset{\eqref{eq:indcpa-negligible-bound}}{\leq}\negl(\lambda).
+\end{aligned}
+$}
+\vfill\hrule
+\end{minipage}
+\hfill
+\begin{minipage}[t][5.6cm][t]{0.48\linewidth}
+\vspace{0pt}
+{\raggedleft\small\itshape By contraposition\par}
+\smallskip\hrule\medskip
+\centering
+\resizebox{\linewidth}{!}{$\displaystyle
+\begin{aligned}
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+&\text{ non-negligible}\\
+\Longrightarrow\quad
+\Adv_{\Pi,D}^{\mathrm{IND\text{-}CPA}}(\lambda)
+&=2\left|P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)-\frac12\right|\\
+&=|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+\quad\text{non-negligible}\\
+&\overset{\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi)}{\Longrightarrow}\bot.
+\end{aligned}
+$}
+\smallskip
+\resizebox{\linewidth}{!}{$\displaystyle
+\Longrightarrow\quad
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|\leq\negl(\lambda).
+$}
+\vfill\hrule
+\end{minipage}
+\par\medskip
+\hrule\medskip
+\end{proof}
+\end{document}

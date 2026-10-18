@@ -452,6 +452,11 @@ H_n:\text{ the }n\text{-th harmonic number}.
 \end{flalign*}
 \end{lemma}
 \begin{proof}
+Idea.
+\[
+\text{loss of greedy pick at }i
+\leq\text{loss of minimum optimal pick at }i.
+\]
 \setlength{\jot}{2pt}
 \setlength{\abovedisplayskip}{3pt}
 \setlength{\belowdisplayskip}{3pt}
@@ -481,6 +486,13 @@ H_n:\text{ the }n\text{-th harmonic number}.
 \endgroup
 \end{proof}
 \end{minipage}\par
+
+\begin{remark}[Price per item as average loss]
+\[
+\ppi(S_i)=\underbrace{\frac{w(S_i)}{|S_i|}}_{\text{average loss (cost paid) per newly covered element}},
+\qquad |S_i|>0.
+\]
+\end{remark}
 
 \noindent\begin{minipage}{\linewidth}
 \begin{theorem}[Approximation ratio of greedy set cover]
@@ -730,6 +742,767 @@ q&:\text{ one fixed polynomial in }|I|\text{ and }1/\varepsilon.
 \end{example}
 \end{minipage}\par
 
+\subsection{Knapsack}
+
+\noindent\begin{minipage}{\linewidth}
+\begin{definition}[Knapsack problem]
+\[
+\Pi_{\mathrm{Knapsack}}
+=\bigl(I,\ \OPT(I)\bigr).
+\]
+\[
+\begin{aligned}
+\text{Input:}\quad&I=\{S,(s_i,p_i)_{i\in S},B\},\qquad |S|=n,\\
+&\forall i\in S:\ s_i,p_i\in\mathbb Z^{+}.\\[6pt]
+\text{Output:}\quad&\OPT(I)\in\mathcal S_I:=\operatorname*{arg\,max}_{\substack{T\subseteq S\\\sum_{i\in T}s_i\leq B}}
+\sum_{i\in T}p_i.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+I&:\text{ knapsack instance},\\
+S&:\text{ finite set of available items},\\
+n&:\text{ number of items},\\
+s_i&:\text{ size of item }i,\\
+p_i&:\text{ profit of item }i,\\
+B&:\text{ budget (capacity)},\\
+T&:\text{ selected subset of items},\\
+\mathcal S_I&:\text{ feasible subsets with maximum total profit},\\
+\OPT(I)&:\text{ optimal subset returned for }I.
+\end{aligned}
+\]
+\end{definition}
+\end{minipage}\par
+
+\[
+\begin{aligned}
+&\sum_{i\in T}s_i\leq B\quad\Longrightarrow\quad
+T\subseteq\{i\in S:s_i\leq B\},\\[3pt]
+&S\leftarrow\{i\in S:s_i\leq B\}
+\quad\Longrightarrow\quad
+\text{W.l.o.g. }\forall i\in S:\ s_i\leq B.
+\end{aligned}
+\]
+
+\noindent\begin{minipage}{\linewidth}
+\begin{example}[Knapsack]
+\[
+I=\{S=\{1:\langle10,130\rangle,\ 2:\langle7,103\rangle,\ 3:\langle6,91\rangle,\
+4:\langle4,40\rangle,\ 5:\langle3,38\rangle\},\ B=10\}.
+\]
+\[
+\begin{aligned}
+\OPT(I)&=\{2,5\}\in\mathcal S_I,\\[3pt]
+\sum_{i\in\OPT(I)}s_i&=7+3=10\leq B,\\[3pt]
+\sum_{i\in\OPT(I)}p_i&=103+38=141.
+\end{aligned}
+\]
+\end{example}
+\end{minipage}\par
+
+\begin{definition}[Exact dynamic programming algorithm]
+\label{def:exact-knapsack-dp}
+\leavevmode
+\begin{enumerate}
+\item For each item $i$, the decision is
+\[
+i\in\OPT(I)\quad\text{(take)}\qquad\text{or}\qquad
+i\notin\OPT(I)\quad\text{(skip)}.
+\]
+\item Two possible subproblem formulations:
+\[
+\begin{aligned}
+F(i,b)&:=\max_{\substack{T\subseteq\{1,\ldots,i\}\\\sum_{j\in T}s_j\leq b}}
+\sum_{j\in T}p_j,\\[6pt]
+M[i,p]&:=\min_{\substack{T\subseteq\{1,\ldots,i\}\\\sum_{j\in T}p_j\geq p}}
+\sum_{j\in T}s_j,\qquad \min\varnothing:=\infty.
+\end{aligned}
+\]
+\item Base cases and recurrences:
+\[
+\begin{aligned}
+&\forall b\geq0:\ F(0,b)=0,\qquad
+\forall i\in\{0,\ldots,n\}:\ F(i,0)=0,\\[3pt]
+&\forall i\in\{1,\ldots,n\}\ \forall b>0:\quad
+F(i,b)=
+\begin{cases}
+F(i-1,b),&s_i>b,\\[3pt]
+\max\{\underbrace{F(i-1,b)}_{\text{skip}},\
+\underbrace{p_i+F(i-1,b-s_i)}_{\text{take}}\},&s_i\leq b.
+\end{cases}
+\end{aligned}
+\]
+\[
+\begin{aligned}
+&\forall p>0:\ M[0,p]=\infty,\\[3pt]
+&\forall i\in\{0,\ldots,n\}\ \forall p\leq0:\ M[i,p]=0,\\[3pt]
+&\forall i\in\{1,\ldots,n\}\ \forall p>0:\quad
+M[i,p]=
+\begin{cases}
+\min\{M[i-1,p],s_i\},&p\leq p_i,\\[3pt]
+\min\{\underbrace{M[i-1,p]}_{\text{skip}},\
+\underbrace{s_i+M[i-1,p-p_i]}_{\text{take}}\},&p>p_i.
+\end{cases}
+\end{aligned}
+\]
+\item Recover the maximum profit:
+\[
+p_{\max}:=\max\bigl(\{0\}\cup\{p_i:i\in S\}\bigr),\qquad
+p^*:=\max\{p\in\{0,\ldots,np_{\max}\}:M[n,p]\leq B\}.
+\]
+\[
+\sum_{j\in\OPT(I)}p_j
+=F(n,B)=p^*.
+\]
+\item Backtracking:
+\[
+\begin{aligned}
+&F:\quad(i,b,T)\leftarrow(n,B,\varnothing),\\[3pt]
+&\text{while }i>0:\quad
+(i,b,T)\leftarrow
+\begin{cases}
+(i-1,b,T),&F(i,b)=F(i-1,b),\\[3pt]
+(i-1,b-s_i,T\cup\{i\}),&F(i,b)>F(i-1,b).
+\end{cases}
+\end{aligned}
+\]
+\[
+\begin{aligned}
+&M:\quad(i,p,T)\leftarrow(n,p^*,\varnothing),\\[3pt]
+&\text{while }i>0:\quad
+(i,p,T)\leftarrow
+\begin{cases}
+(i-1,p,T),&M[i,p]=M[i-1,p],\\[3pt]
+(i-1,\max\{0,p-p_i\},T\cup\{i\}),&M[i,p]<M[i-1,p].
+\end{cases}
+\end{aligned}
+\]
+\[
+\text{return }T\in\mathcal S_I.
+\]
+\item Running time:
+\[
+\begin{aligned}
+F&:\ O\!\left(n(\lfloor B\rfloor+1)\right),\\
+M&:\ O\!\left(n(np_{\max}+1)\right)=O(n^2p_{\max})\quad(S\neq\varnothing),\\
+\text{backtracking}&:\ O(n).
+\end{aligned}
+\]
+\end{enumerate}
+\[
+\begin{aligned}
+i&:\text{ number of available items after relabeling }S=\{1,\ldots,n\},\\
+b&:\text{ capacity},\\
+p&:\text{ target profit},\\
+F(i,b)&:\text{ maximum profit with capacity }b\text{ using the first }i\text{ items},\\
+M[i,p]&:\text{ minimum size for profit at least }p\text{ using the first }i\text{ items},\\
+p_{\max}&:\text{ maximum item profit (zero if }S=\varnothing\text{)},\\
+p^*&:\text{ largest profit whose minimum required size is at most }B,\\
+T&:\text{ selected items recovered by backtracking (skip on ties)}.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{remark}[Pseudo-polynomial running time]
+\[
+\begin{aligned}
+\operatorname{bits}(B)&=\Theta(\log B),\qquad
+\operatorname{bits}(p_{\max})=\Theta(\log p_{\max}),\\[3pt]
+B=2^k&\ \Longrightarrow\ O(nB)=O(n2^k),\\
+p_{\max}=2^k&\ \Longrightarrow\ O(n^2p_{\max})=O(n^2 2^k).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+O(nB)&\subseteq\poly(n,B),\\
+O(n^2p_{\max})&\subseteq\poly(n,p_{\max})
+\end{aligned}
+\quad\Longrightarrow\quad\text{pseudo-polynomial}.
+\]
+\end{remark}
+
+\begin{definition}[FPTAS-Knapsack]
+\[
+\begin{aligned}
+\text{Input:}\quad&I=\bigl(S,(s_i,p_i)_{i\in S},B\bigr),\qquad\varepsilon>0.\\[3pt]
+\text{Output:}\quad&T\subseteq S,\qquad\sum_{i\in T}s_i\leq B.
+\end{aligned}
+\]
+\begin{enumerate}
+\item If $S=\varnothing$, return $\varnothing$. Otherwise, set
+\[
+n:=|S|,\qquad p_{\max}:=\max_{i\in S}p_i,\qquad
+k:=\max\left\{1,\left\lfloor\frac{\varepsilon p_{\max}}n\right\rfloor\right\}.
+\]
+\item Round down the profits:
+\[
+\forall i\in S:\quad p_i'\leftarrow k\left\lfloor\frac{p_i}{k}\right\rfloor.
+\]
+\item Run the exact knapsack algorithm from Definition~\ref{def:exact-knapsack-dp} with
+\[
+I'=\bigl(S,(s_i,p_i')_{i\in S},B\bigr),\qquad
+\text{DP columns: }0,k,2k,\ldots
+\]
+and return its selected items.
+\end{enumerate}
+\[
+\begin{aligned}
+\varepsilon&:\text{ approximation parameter},\\
+k&:\text{ rounding step (see the }
+\hyperref[rem:fptas-rounding]{\text{approximation remark below}}\text{)},\\
+p_i'&:\text{ rounded profit of item }i,\\
+I'&:\text{ rounded instance},\\
+T&:\text{ selected items, evaluated using their original profits }p_i.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{remark}[Deriving the FPTAS and choosing $k$]
+\phantomsection\label{rem:fptas-rounding}
+\[
+\begin{aligned}
+&T=\mathcal A(I,\varepsilon),\qquad\forall\varepsilon>0\ \forall I:\\[3pt]
+\text{1. Feasibility:}\quad&T\subseteq S,\qquad\sum_{i\in T}s_i\leq B.\\[3pt]
+\text{2. Approximation:}\quad&p(\OPT'(I))\geq(1-\varepsilon)p(\OPT(I)).\\[3pt]
+\text{3. Running time:}\quad&\mathrm{time}_{\mathcal A}(I,\varepsilon)
+\leq q(|I|,1/\varepsilon),\qquad q\text{ polynomial}.
+\end{aligned}
+\]
+\begin{enumerate}
+\item Feasibility:
+\[
+S,s_i,B\text{ unchanged},\qquad p_i\to p_i'
+\quad\Longrightarrow\quad
+T\subseteq S,\qquad\sum_{i\in T}s_i\leq B.
+\]
+\item Approximation:
+\[
+\begin{aligned}
+&\underbrace{\mathrm{loss}(\OPT(I))\leq\varepsilon p(\OPT(I))}_{\text{sufficient loss bound}}\\[3pt]
+&\quad\Longleftrightarrow\quad
+p(\OPT(I))-p'(\OPT(I))\leq\varepsilon p(\OPT(I))\\[3pt]
+&\quad\Longleftrightarrow\quad
+p'(\OPT(I))\geq p(\OPT(I))-\varepsilon p(\OPT(I))\\[3pt]
+&\quad\Longleftrightarrow\quad
+p(\OPT(I))\geq p(\OPT'(I))\geq p'(\OPT'(I))\geq p'(\OPT(I))\;\geq\;(1-\varepsilon)p(\OPT(I)).
+\end{aligned}
+\]
+\[
+p(T):=\sum_{i\in T}p_i,\qquad
+p'(T):=\sum_{i\in T}p_i',\qquad
+\mathrm{loss}(T):=p(T)-p'(T).
+\]
+\[
+\begin{aligned}
+&\forall i\in S:\quad 0\leq p_i-p_i'<k,\\[3pt]
+&\mathrm{loss}(\OPT(I))
+=\sum_{i\in\OPT(I)}(p_i-p_i')\leq nk,\\[3pt]
+\end{aligned}
+\]
+\[
+p_{\max}\leq p(\OPT(I))
+\quad\Longrightarrow\quad
+\varepsilon p_{\max}\leq\varepsilon\,p(\OPT(I)).
+\]
+\[
+\mathrm{loss}(\OPT(I))\leq nk
+\quad\xRightarrow{\text{sufficient loss bound}}\quad
+\mathrm{loss}(\OPT(I))\leq nk\leq\varepsilon p_{\max}
+\leq\varepsilon\,p(\OPT(I)).
+\]
+\[
+nk\leq\varepsilon p_{\max}
+\quad\Longleftrightarrow\quad
+k\leq\frac{\varepsilon p_{\max}}n
+\quad\xRightarrow{\text{largest integer }k}\quad
+k=\left\lfloor\frac{\varepsilon p_{\max}}n\right\rfloor.
+\]
+\[
+k:=\max\left\{1,\left\lfloor\frac{\varepsilon p_{\max}}n\right\rfloor\right\},
+\qquad k=1\ \Longrightarrow\ p_i'=p_i\ \Longrightarrow\ \mathrm{loss}(T)=0.
+\]
+\item Fully polynomial running time:
+\[
+\begin{aligned}
+&\frac{p_{\max}}k\leq\frac{2n}{\varepsilon},\\[3pt]
+&\mathrm{time}_{\mathcal A}(I,\varepsilon)
+\in O\!\left(n\left(\left\lfloor\frac{np_{\max}}k\right\rfloor+1\right)\right)
+\subseteq O\!\left(n+\frac{n^3}{\varepsilon}\right)
+\subseteq\poly(|I|,1/\varepsilon).
+\end{aligned}
+\]
+\end{enumerate}
+\[
+\begin{aligned}
+T&:\text{ subset of items},\\
+\OPT'(I)&:\text{ optimal selected subset for the rounded instance }I',\\
+p(T)&:\text{ original total profit of }T,\\
+p'(T)&:\text{ rounded total profit of }T,\\
+\mathrm{loss}(T)&:\text{ profit lost through rounding},\\
+n&:\text{ number of remaining items (}n>0\text{)}.
+\end{aligned}
+\]
+\end{remark}
+
+\noindent\begin{minipage}{\linewidth}
+\begin{example}[FPTAS-Knapsack]
+\[
+I=\{S=\{1:\langle10,130\rangle,\ 2:\langle7,103\rangle,\ 3:\langle6,91\rangle,\
+4:\langle4,40\rangle,\ 5:\langle3,38\rangle\},\ B=10\}.
+\]
+\[
+\varepsilon=\frac12,\qquad n=5,\qquad p_{\max}=130,\qquad
+k=\max\left\{1,\left\lfloor\frac{(1/2)\cdot130}{5}\right\rfloor\right\}=13.
+\]
+\[
+I'=\{S=\{1:\langle10,130\rangle,\ 2:\langle7,91\rangle,\ 3:\langle6,91\rangle,\
+4:\langle4,39\rangle,\ 5:\langle3,26\rangle\},\ B=10\}.
+\]
+\[
+\begin{aligned}
+\OPT(I)&=\{2,5\},&p(\OPT(I))&=103+38=141,\\
+&&p'(\OPT(I))&=91+26=117,\\[3pt]
+\OPT'(I)&=\{3,4\}\quad\text{(lecture's tie choice)},&
+p'(\OPT'(I))&=91+39=130,\\
+&&p(\OPT'(I))&=91+40=131.
+\end{aligned}
+\]
+\[
+\mathrm{loss}(\OPT(I))=141-117=24,\qquad
+\mathrm{loss}(\OPT'(I))=131-130=1.
+\]
+\[
+p(\OPT'(I))=131\geq(1-\varepsilon)p(\OPT(I))=\frac12\cdot141=70.5.
+\]
+\[
+p'(\{1\})=p'(\{3,4\})=130,\qquad
+\text{skip on ties}\ \Longrightarrow\ \OPT'(I)=\{1\},\quad p(\{1\})=130.
+\]
+\end{example}
+\end{minipage}\par
+
+\begin{definition}[1-Lipschitz continuity]
+\[
+f:D\subseteq\mathbb R\to\mathbb R,\qquad
+f\text{ is 1-Lipschitz continuous}
+\quad\Longleftrightarrow\quad
+\forall x,y\in D:\ |f(x)-f(y)|\leq|x-y|.
+\]
+\[
+\begin{aligned}
+D&:\text{ domain},\\
+x,y&:\text{ input values},\\
+f(x),f(y)&:\text{ corresponding output values}.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{remark}[Why round profits instead of sizes?]
+\begin{enumerate}
+\item Profits: fix $B$, all sizes, and all profits except $p_i$.
+\[
+\begin{aligned}
+f(x)&:=p_{\mathrm{OPT}}(p_1,\ldots,p_{i-1},x,p_{i+1},\ldots,p_n),\\[3pt]
+\forall\varepsilon>0:\quad
+f(p_i)&\leq f(p_i+\varepsilon)\leq f(p_i)+\varepsilon,\\[3pt]
+|f(p_i+\varepsilon)-f(p_i)|&\leq\varepsilon
+\quad\Longrightarrow\quad f\text{ is 1-Lipschitz continuous}.
+\end{aligned}
+\]
+\item Sizes: one item with profit $P>0$ and size $x$.
+\[
+g(x):=\begin{cases}
+P,&0<x\leq B,\\
+0,&x>B.
+\end{cases}
+\]
+\[
+\forall\varepsilon>0:\quad
+|g(B+\varepsilon)-g(B)|=P,
+\qquad\lim_{\varepsilon\downarrow0}g(B+\varepsilon)=0\neq g(B)=P.
+\]
+\[
+\varepsilon\to0,\quad P\text{ arbitrarily large}
+\quad\Longrightarrow\quad g\text{ is not continuous at }B.
+\]
+\end{enumerate}
+\[
+\begin{aligned}
+p_{\mathrm{OPT}}&:\text{ optimal total profit},\\
+f(x)&:\text{ optimal total profit when item }i\text{'s profit is }x,\\
+g(x)&:\text{ optimal total profit when the single item's size is }x,\\
+\varepsilon&:\text{ positive change in one profit or size (real-valued extension)},\\
+P&:\text{ fixed profit of the single item}.
+\end{aligned}
+\]
+\end{remark}
+
+\subsection{Bin packing}
+
+\noindent\begin{minipage}{\linewidth}
+\begin{definition}[Bin packing problem]
+\[
+\Pi_{\mathrm{BinPacking}}
+=\bigl(I,\ \OPT(I)\bigr).
+\]
+\[
+\begin{aligned}
+\text{Input:}\quad&I=\{S,(\mathrm{size}(i))_{i\in S}\},\qquad |S|=n,\\
+&\forall i\in S:\quad\mathrm{size}(i)\in(0,1].\\[6pt]
+\text{Output:}\quad&\OPT(I)\in\mathcal S_I:=
+\operatorname*{arg\,min}_{\substack{\mathcal B\text{ partitions }S\\
+\forall b\in\mathcal B:\ \sum_{i\in b}\mathrm{size}(i)\leq1}}
+|\mathcal B|.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+I&:\text{ bin-packing instance},\\
+S&:\text{ finite set of items},\\
+n&:\text{ number of items},\\
+\mathrm{size}(i)&:\text{ size of item }i,\\
+b&:\text{ items assigned to one unit-capacity bin},\\
+\mathcal B&:\text{ collection of bins, assigning each item exactly once},\\
+|\mathcal B|&:\text{ number of bins},\\
+\mathcal S_I&:\text{ feasible bin assignments using the minimum number of bins},\\
+\OPT(I)&:\text{ optimal bin assignment}.
+\end{aligned}
+\]
+\end{definition}
+\end{minipage}\par
+
+\begin{remark}
+\[
+\mathrm{size}(I):=\sum_{i=1}^n\mathrm{size}(i)\leq|\OPT(I)|.
+\]
+\end{remark}
+
+\noindent\begin{minipage}{\linewidth}
+\begin{example}[Bin packing]
+\[
+I=\{S=\{1:0.5,\ 2:0.1,\ 3:0.1,\ 4:0.1,\ 5:0.5,\ 6:0.4,\
+7:0.5,\ 8:0.4,\ 9:0.4\}\}.
+\]
+\[
+\mathrm{size}(I)=3\cdot0.5+3\cdot0.4+3\cdot0.1=3
+\quad\Longrightarrow\quad |\OPT(I)|\geq3.
+\]
+\[
+b_1=\{1,6,2\},\qquad b_2=\{5,8,3\},\qquad b_3=\{7,9,4\}.
+\]
+\[
+\forall j\in\{1,2,3\}:\quad
+\sum_{i\in b_j}\mathrm{size}(i)=0.5+0.4+0.1=1.
+\]
+\[
+\OPT(I)=\{b_1,b_2,b_3\},\qquad |\OPT(I)|=3.
+\]
+\end{example}
+\end{minipage}\par
+
+\begin{definition}[FirstFit algorithm]
+\[
+\begin{aligned}
+\text{Input:}\quad&I=\{S=\{1,\ldots,n\},\ (\mathrm{size}(i))_{i\in S}\},\\
+&
+\forall i\in S:\ \mathrm{size}(i)\in(0,1].\\[3pt]
+\text{Output:}\quad&B=\{b_1,\ldots,b_m\}.
+\end{aligned}
+\]
+\[
+\mathrm{size}(b):=\sum_{i\in b}\mathrm{size}(i),\qquad
+\mathrm{free}(b):=1-\mathrm{size}(b).
+\]
+\begin{algorithm}[H]
+\caption{$\mathsf{FirstFit}(I)$}
+\begin{algorithmic}[1]
+\State $m\gets0$
+\For{$i=1,\ldots,n$}
+    \If{$\exists\ell\in\{1,\ldots,m\}:\ \mathrm{free}(b_\ell)\geq\mathrm{size}(i)$}
+        \State $j\gets\min\{\ell\in\{1,\ldots,m\}:\mathrm{free}(b_\ell)\geq\mathrm{size}(i)\}$
+        \State $b_j\gets b_j\cup\{i\}$
+    \Else
+        \State $m\gets m+1$
+        \State $b_m\gets\{i\}$
+    \EndIf
+\EndFor
+\State \Return $B=\{b_1,\ldots,b_m\}$
+\end{algorithmic}
+\end{algorithm}
+\[
+\begin{aligned}
+B&:\text{ collection of bins},\\
+m&:\text{ number of bins created},\\
+b_j&:\text{ }j\text{-th bin in creation order},\\
+\mathrm{size}(b)&:\text{ total size of items in bin }b,\\
+\mathrm{free}(b)&:\text{ remaining capacity of bin }b,\\
+j&:\text{ index of the first existing bin that fits item }i.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{lemma}[FirstFit: at most one bin at most half full]
+\label{lem:firstfit-half-full}
+\[
+B=\mathsf{FirstFit}(I)
+\quad\Longrightarrow\quad
+\left|\left\{b\in B:\mathrm{size}(b)\leq\frac12\right\}\right|\leq1.
+\]
+\end{lemma}
+\begin{proof}
+By contradiction.
+\[
+\exists j<\ell:\quad
+\mathrm{size}(b_j)\leq\frac12,\qquad\mathrm{size}(b_\ell)\leq\frac12.
+\]
+For the item $i$ opening $b_\ell$:
+\[
+\underbrace{
+\mathrm{free}(b_j)
+}_{\text{when }b_\ell\text{ opens}}
+\geq1-\mathrm{size}(b_j)
+\geq\frac12
+\geq\mathrm{size}(b_\ell)
+\geq\mathrm{size}(i).
+\]
+\[
+i\text{ fits in }b_j
+\quad\Longrightarrow\quad b_\ell\text{ is not opened}
+\quad\Longrightarrow\quad\bot.
+\]
+\end{proof}
+
+\begin{theorem}[FirstFit is a 2-approximation]
+\[
+\begin{aligned}
+\forall I:\quad &|\mathsf{FirstFit}(I)|\leq2|\OPT(I)|,\\[3pt]
+&\mathrm{time}_{\mathsf{FirstFit}}(I)\in\poly(|I|).
+\end{aligned}
+\]
+\end{theorem}
+\begin{proof}
+\[
+B:=\mathsf{FirstFit}(I),\qquad m:=|B|.
+\]
+\[
+S=\varnothing\quad\Longrightarrow\quad m=0=|\OPT(I)|.
+\]
+For $S\neq\varnothing$, by Lemma~\ref{lem:firstfit-half-full}:
+\[
+\frac{m-1}{2}<\sum_{b\in B}\mathrm{size}(b)
+=\mathrm{size}(I)\leq|\OPT(I)|.
+\]
+\[
+m-1<2|\OPT(I)|,\qquad m,|\OPT(I)|\in\{0\}\cup\mathbb Z^{+}
+\quad\Longrightarrow\quad m\leq2|\OPT(I)|.
+\]
+\[
+\mathrm{time}_{\mathsf{FirstFit}}(I)
+\in O\!\left(\sum_{i=1}^n i\right)
+=O(n^2)\subseteq\poly(|I|).
+\]
+\end{proof}
+
+\noindent\begin{minipage}{\linewidth}
+\begin{example}[FirstFit]
+\[
+I=\{S=\{1:0.5,\ 2:0.1,\ 3:0.1,\ 4:0.1,\ 5:0.5,\ 6:0.4,\
+7:0.5,\ 8:0.4,\ 9:0.4\}\}.
+\]
+\[
+\begin{aligned}
+b_1&=\{1,2,3,4\},&\mathrm{size}(b_1)&=0.5+0.1+0.1+0.1=0.8,\\
+b_2&=\{5,6\},&\mathrm{size}(b_2)&=0.5+0.4=0.9,\\
+b_3&=\{7,8\},&\mathrm{size}(b_3)&=0.5+0.4=0.9,\\
+b_4&=\{9\},&\mathrm{size}(b_4)&=0.4.
+\end{aligned}
+\]
+\[
+\mathsf{FirstFit}(I)=\{b_1,b_2,b_3,b_4\},\qquad
+|\mathsf{FirstFit}(I)|=4\leq2|\OPT(I)|=6.
+\]
+\end{example}
+\end{minipage}\par
+
+\begin{definition}[SortedFirstFit algorithm]
+\[
+\begin{aligned}
+\text{Input:}\quad&I=\{S=\{1,\ldots,n\},\ (\mathrm{size}(i))_{i\in S}\},\\
+&\forall i\in S:\quad\mathrm{size}(i)\in(0,1].\\[3pt]
+\text{Output:}\quad&B=\{b_1,\ldots,b_m\}.
+\end{aligned}
+\]
+\begin{algorithm}[H]
+\caption{$\mathsf{SortedFirstFit}(I)$}
+\begin{algorithmic}[1]
+\State Sort and relabel items so that $\mathrm{size}(1)\geq\cdots\geq\mathrm{size}(n)$.
+\State \Return $\mathsf{FirstFit}(I)$
+\end{algorithmic}
+\end{algorithm}
+\[
+\begin{aligned}
+B&:\text{ collection of bins returned by FirstFit after sorting},\\
+m&:\text{ number of bins},\\
+b_j&:\text{ }j\text{-th bin in creation order}.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{theorem}[SortedFirstFit is a $\frac32$-approximation]
+\[
+\begin{aligned}
+\forall I:\quad &|\mathsf{SortedFirstFit}(I)|\leq\frac32|\OPT(I)|,\\[3pt]
+&\mathrm{time}_{\mathsf{SortedFirstFit}}(I)\in\poly(|I|).
+\end{aligned}
+\]
+\end{theorem}
+\begin{proof}
+\[
+k:=|\mathsf{SortedFirstFit}(I)|,\qquad
+r:=|\{i\in S:\mathrm{size}(i)>\tfrac12\}|.
+\]
+\[
+k=1\quad\Longrightarrow\quad
+|\OPT(I)|\geq1\quad\Longrightarrow\quad
+k=1\leq\frac32|\OPT(I)|.
+\]
+Assume $k\geq2$.
+
+Case 1: $r\geq\frac{2k}{3}$.
+\[
+|\OPT(I)|\geq r\geq\frac{2k}{3}
+\quad\Longrightarrow\quad k\leq\frac32|\OPT(I)|.
+\]
+Case 2: $r<\frac{2k}{3}$.
+\[
+k_1:=\left\lceil\frac{2k}{3}\right\rceil-1,
+\qquad k_2:=k-k_1.
+\]
+The first $k_1$ bins are early; the rest are late.
+Late items have size $\leq\frac12$, so each late bin except possibly the last
+has at least two items.
+\[
+\#\{\text{late items}\}
+\geq2(k_2-1)+1
+=2k-2\left\lceil\frac{2k}{3}\right\rceil+1
+\geq k_1.
+\]
+Pair distinct late items $i_1,\ldots,i_{k_1}$ with early bins $b_1,\ldots,b_{k_1}$.
+Each item failed to fit:
+\[
+\forall j\in\{1,\ldots,k_1\}:\quad
+\mathrm{size}(i_j)+\mathrm{size}(b_j)>1.
+\]
+\[
+\begin{aligned}
+|\OPT(I)|\geq\mathrm{size}(I)
+&\geq\sum_{j=1}^{k_1}\bigl(\mathrm{size}(b_j)+\mathrm{size}(i_j)\bigr)\\
+&>k_1=\left\lceil\frac{2k}{3}\right\rceil-1.
+\end{aligned}
+\]
+\[
+|\OPT(I)|\in\mathbb Z
+\quad\Longrightarrow\quad
+|\OPT(I)|\geq\left\lceil\frac{2k}{3}\right\rceil\geq\frac{2k}{3}
+\quad\Longrightarrow\quad k\leq\frac32|\OPT(I)|.
+\]
+\[
+\mathrm{time}_{\mathsf{SortedFirstFit}}(I)
+\in O(n\log n)+O(n^2)\subseteq\poly(|I|).
+\]
+\end{proof}
+
+\begin{definition}[Partition problem]
+\[
+\Pi_{\mathrm{Partition}}
+=\bigl(I,\ \mathsf{Partition}(I)\bigr).
+\]
+\[
+\begin{aligned}
+\text{Input:}\quad &I=\{x_1,\ldots,x_n\},\quad S:=I,
+\qquad x_1,\ldots,x_n\in\mathbb Z^{+}.\\[3pt]
+\text{Output:}\quad &\mathsf{Partition}(I)=
+\begin{cases}
+\mathrm{YES},&\begin{aligned}
+\exists S_1,S_2:\quad&S_1\cup S_2=S,\quad S_1\cap S_2=\varnothing,\\
+&\displaystyle\sum_{x\in S_1}x=\sum_{x\in S_2}x,
+\end{aligned}\\[6pt]
+\mathrm{NO},&\text{otherwise}.
+\end{cases}
+\end{aligned}
+\]
+\[
+\begin{aligned}
+S&:\text{ multiset of positive integers; repeated occurrences are distinct}.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{theorem}[Hardness of approximation for bin packing]
+\[
+\exists\text{ polynomial-time }\alpha\text{-approximation for bin packing},
+\quad 1\leq\alpha<\frac32
+\quad\Longrightarrow\quad P=NP.
+\]
+\end{theorem}
+\begin{proof}
+Assume
+\[
+\exists\mathcal A,\quad 0<\varepsilon\leq\frac12:\qquad
+\begin{aligned}
+\forall I':\quad &|\OPT(I')|\leq|\mathcal A(I')|
+\leq\left(\frac32-\varepsilon\right)|\OPT(I')|,\\
+&\mathrm{time}_{\mathcal A}(I')\in\poly(|I'|).
+\end{aligned}
+\]
+\[
+\Pi_{\mathrm{Partition}}
+=\bigl(I=\{x_1,\ldots,x_n\},\ \mathsf{Partition}(I)\bigr),
+\qquad x_i\in\mathbb Z^{+}.
+\]
+\[
+X:=\sum_{i=1}^n x_i.
+\]
+\[
+\exists i:\ x_i>\frac X2\quad\Longrightarrow\quad\mathrm{NO}.
+\]
+Otherwise,
+\[
+\Pi_{\mathrm{BinPacking}}=\bigl(I',\ \OPT(I')\bigr).
+\]
+\[
+I'=\left\{\frac{x_1}{X/2},\ldots,\frac{x_n}{X/2}\right\}.
+\]
+\[
+\mathsf{Partition}(I)=\mathrm{YES}
+\iff \exists_{\substack{S_1\cup S_2=I\\S_1\cap S_2=\varnothing}} S_1,S_2:\quad
+\sum_{x\in S_1}x=\sum_{x\in S_2}x=\frac X2
+\iff |\OPT(I')|=2.
+\]
+\[
+\begin{aligned}
+|\OPT(I')|=2
+&\Longrightarrow 2\leq|\mathcal A(I')|\leq3-2\varepsilon<3
+\Longrightarrow |\mathcal A(I')|=2,\\
+|\OPT(I')|\geq3
+&\Longrightarrow |\mathcal A(I')|\geq3.
+\end{aligned}
+\]
+\[
+\mathcal A_{\mathrm{Partition}}(I)=
+\begin{cases}
+\mathrm{YES},&|\mathcal A(I')|=2,\\
+\mathrm{NO},&|\mathcal A(I')|\geq3.
+\end{cases}
+\]
+\[
+\mathrm{time}_{\mathcal A_{\mathrm{Partition}}}(I)\in\poly(|I|)
+\quad\Longrightarrow\quad
+\Pi_{\mathrm{Partition}}\in P
+\quad\xRightarrow{\Pi_{\mathrm{Partition}}\text{ NP-hard}}\quad P=NP.
+\]
+\end{proof}
+
 \subsection*{Questions}
 \addcontentsline{toc}{subsection}{Questions}
 \begin{enumerate}
@@ -745,6 +1518,11 @@ How does this relate to Definition~1.1, which uses
 $c(\OPT(I))\leq\alpha\,c(\mathcal A(I))$?
 Is the intended correspondence $\alpha=1/(1-\varepsilon)$ for
 $0<\varepsilon<1$, rather than $\alpha=1+\varepsilon$?
+\item In Section~2.1, should ``the highest profit for an item'' be written as
+``the maximum profit among all items''? Each item has one fixed profit $p_i$,
+and $p_{\max}=\max_{i\in S}p_i$ takes the maximum over all items.
+\item In the proof of Theorem~2.4, should ``$p(S)$ and $'(S)$'' read
+``$p(S)$ and $p'(S)$''? The rounded-profit notation appears to be missing $p$.
 \end{enumerate}
 
 \clearpage

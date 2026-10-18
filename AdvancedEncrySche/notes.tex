@@ -10,6 +10,52 @@
 \maketitle
 \tableofcontents
 
+\setcounter{section}{-1}
+\section{Lecture 0}
+
+\begin{definition}[KEM/DEM paradigm]
+\[
+\begin{aligned}
+\mathsf{KEM}&:=(\mathsf{Gen},\mathsf{Encaps},\mathsf{Decaps}),\\
+\mathsf{Gen}(1^\lambda)&\longrightarrow(pk,sk),\\
+\mathsf{Encaps}(pk)&\longrightarrow(K,c_1),\\
+\mathsf{Decaps}(sk,c_1)&\longrightarrow K'\ \text{or}\ \bot.
+\end{aligned}
+\qquad
+\begin{aligned}
+\mathsf{DEM}&:=(\mathsf{Enc},\mathsf{Dec}),\\
+\mathsf{Enc}(K,m)&\longrightarrow c_2,\\
+\mathsf{Dec}(K,c_2)&\longrightarrow m'\ \text{or}\ \bot.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\text{Hybrid encryption}:\quad
+&(K,c_1)\leftarrow\mathsf{KEM.Encaps}(pk),\quad
+c_2\leftarrow\mathsf{DEM.Enc}(K,m),\quad ct:=(c_1,c_2),\\
+\text{Hybrid decryption}:\quad
+&K'\leftarrow\mathsf{KEM.Decaps}(sk,c_1),\quad
+m'\leftarrow\mathsf{DEM.Dec}(K',c_2)
+\quad(K'\ne\bot).
+\end{aligned}
+\]
+\[
+K'=\bot\ \Longrightarrow\ \text{hybrid decryption outputs }\bot.
+\]
+\[
+\begin{aligned}
+\mathsf{KEM}&:\text{ Key Encapsulation Mechanism},\\
+\mathsf{DEM}&:\text{ Data Encapsulation Mechanism},\\
+\lambda\in\mathbb{N}&:\text{ security parameter},\\
+pk,sk&:\text{ public and secret keys},\\
+K&:\text{ symmetric key},\\
+m&:\text{ message},\\
+c_1,c_2&:\text{ key encapsulation, encrypted data},\\
+\bot&:\text{ failure}.
+\end{aligned}
+\]
+\end{definition}
+
 \section{Lecture 1}
 
 \begin{definition}[Probabilistic polynomial-time algorithm]
@@ -22,10 +68,107 @@
 \[
 \mu:\mathbb{N}\to\mathbb{R}\text{ negligible}
 \ \iff\ 
-\forall c\in\mathbb{N}_{>0}\ \exists \lambda_0\in\mathbb{N}\ \forall \lambda\ge\lambda_0:
+\forall c\in\mathbb{N}\ \exists \lambda_0\in\mathbb{N}\ \forall \lambda\ge\lambda_0:
 \quad |\mu(\lambda)|<\frac{1}{\lambda^c}.
 \]
 \end{definition}
+
+\begin{problem}[Exercise sheet 1: Negligible Functions]
+Prove or disprove that the following functions are negligible.
+You can use that $f(n)=1/2^n$ is negligible.
+\begin{enumerate}
+\setcounter{enumi}{-1}
+\item $f_0(\lambda)=\dfrac{1}{2^\lambda}$.
+\begin{solution}
+\[
+\begin{aligned}
+&\forall c\in\mathbb{N}:\quad
+\lim_{\lambda\to\infty}\frac{\lambda^c}{2^\lambda}=0\\
+\Longrightarrow\quad
+&\forall c\in\mathbb{N}\ \exists\lambda_0\in\mathbb{N}\
+\forall\lambda\ge\lambda_0:
+\quad\frac{\lambda^c}{2^\lambda}<1\\
+\Longrightarrow\quad
+&\forall c\in\mathbb{N}\ \exists\lambda_0\in\mathbb{N}\
+\forall\lambda\ge\lambda_0:
+\quad |f_0(\lambda)|=\frac{1}{2^\lambda}<\frac{1}{\lambda^c}\\
+\Longrightarrow\quad
+&f_0\text{ is negligible}.
+\end{aligned}
+\]
+\end{solution}
+\item $f_1(n)=\dfrac{1}{n^{20}}$.
+\begin{solution}
+\[
+\begin{aligned}
+c:=20\in\mathbb{N}
+\ \Longrightarrow\
+&\forall\lambda_0\in\mathbb{N}\ \exists\lambda\ge\lambda_0:
+\quad |f_1(\lambda)|=\frac{1}{\lambda^{20}}
+=\frac{1}{\lambda^c}\ge\frac{1}{\lambda^c}\\
+\ \Longrightarrow\
+&\exists c\in\mathbb{N}\ \forall\lambda_0\in\mathbb{N}\
+\exists\lambda\ge\lambda_0:
+\quad |f_1(\lambda)|\ge\frac{1}{\lambda^c}\\
+\ \Longrightarrow\
+&f_1\text{ is non-negligible}.
+\end{aligned}
+\]
+\end{solution}
+\item $f_2(n)=\dfrac{2^n}{(2^n)^2}$.
+\begin{solution}
+\[
+|f_2(\lambda)|
+=\frac{2^\lambda}{(2^\lambda)^2}
+=\frac{1}{2^\lambda}
+=f_0(\lambda)
+\ \Longrightarrow\quad f_2\text{ is negligible}.
+\]
+\end{solution}
+\item $f_3(n)=\left|\dfrac{(-1)^n}{2^n}\right|$.
+\begin{solution}
+\[
+|f_3(\lambda)|
+=\left|\frac{(-1)^\lambda}{2^\lambda}\right|
+=\frac{1}{2^\lambda}
+=f_0(\lambda)
+\ \Longrightarrow\quad f_3\text{ is negligible}.
+\]
+\end{solution}
+\item $f_4(n)=\dfrac{(-1)^n}{2^n}$.
+\begin{solution}
+\[
+|f_4(\lambda)|
+=\left|\frac{(-1)^\lambda}{2^\lambda}\right|
+=\frac{1}{2^\lambda}
+=f_0(\lambda)
+\ \Longrightarrow\quad f_4\text{ is negligible}.
+\]
+\end{solution}
+\item $f_5(n)=\dfrac{n^2+n^7}{2^n}$.
+\begin{solution}
+\[
+\begin{aligned}
+&\forall c\in\mathbb{N}:\quad
+\lim_{\lambda\to\infty}\lambda^c|f_5(\lambda)|
+=\lim_{\lambda\to\infty}
+\left(\frac{\lambda^{c+2}}{2^\lambda}
++\frac{\lambda^{c+7}}{2^\lambda}\right)=0\\
+\Longrightarrow\quad
+&\forall c\in\mathbb{N}\ \exists\lambda_0\in\mathbb{N}\
+\forall\lambda\ge\lambda_0:
+\quad\lambda^c|f_5(\lambda)|<1\\
+\Longrightarrow\quad
+&\forall c\in\mathbb{N}\ \exists\lambda_0\in\mathbb{N}\
+\forall\lambda\ge\lambda_0:
+\quad |f_5(\lambda)|<\frac{1}{\lambda^c}\\
+\Longrightarrow\quad
+&f_5\text{ is negligible}.
+\end{aligned}
+\]
+\end{solution}
+\end{enumerate}
+\end{problem}
 
 \begin{definition}[Public key encryption scheme]
 \[
@@ -33,37 +176,46 @@
 \]
 \[
 \mathrm{PKE}(\Pi)\iff
-\begin{cases}
-\mathrm{PPT}(\mathsf{Gen})\land
+\left\{
+\begin{aligned}
+&\mathrm{PPT}(\mathsf{Gen})\land
 \mathrm{PPT}(\mathsf{Enc})\land
 \mathrm{PPT}(\mathsf{Dec}),\\[3pt]
-\forall\lambda\in\mathbb{N}_{>0}:\\[2pt]
-\quad\mathsf{Gen}(1^\lambda)\in
-\mathcal{K}_{\mathrm{pub},\lambda}\times\mathcal{K}_{\mathrm{sec},\lambda},\\[3pt]
-\quad\forall pk\in\mathcal{K}_{\mathrm{pub},\lambda}\ \forall m\in\mathcal{M}_\lambda:\\
-\qquad\mathsf{Enc}(pk,m)\in\mathcal{C}_\lambda,\\[3pt]
-\quad\forall sk\in\mathcal{K}_{\mathrm{sec},\lambda}\ \forall ct\in\mathcal{C}_\lambda:\\
-\qquad\mathsf{Dec}(sk,ct)\in\mathcal{M}_\lambda\sqcup\{\bot\}.
-\end{cases}
+&\forall\lambda\in\mathbb{N}:\\[2pt]
+&\quad\mathcal{K}_{\mathrm{pub},\lambda}\times\mathcal{K}_{\mathrm{sec},\lambda}
+\ni(pk,sk)\longleftarrow\mathsf{Gen}(1^\lambda),\\[3pt]
+&\quad\begin{aligned}
+\forall pk\in\mathcal{K}_{\mathrm{pub},\lambda}\ \forall m\in\mathcal{M}_\lambda:
+&\quad\mathcal{C}_\lambda\ni ct\longleftarrow\mathsf{Enc}(pk,m),\\[3pt]
+\forall sk\in\mathcal{K}_{\mathrm{sec},\lambda}\ \forall ct\in\mathcal{C}_\lambda:
+&\quad\mathcal{M}_\lambda\cup\{\bot\}\ni m'\longleftarrow\mathsf{Dec}(sk,ct).
+\end{aligned}
+\end{aligned}
+\right.
 \]
 \[
 \begin{aligned}
-\mathsf{Gen},\mathsf{Enc},\mathsf{Dec}&:\text{ algorithms},\\
+\mathsf{Gen},\mathsf{Enc},\mathsf{Dec}&:\text{ key generation, encryption, decryption algorithms},\\
 \lambda&:\text{ security parameter},\\
 \mathcal{K}_{\mathrm{pub},\lambda},\mathcal{K}_{\mathrm{sec},\lambda}
 &:\text{ public and secret key spaces},\\
-\mathcal{M}_{\lambda},\mathcal{C}_{\lambda}
-&:\text{ message and ciphertext spaces},\\
-\bot&:\text{ decryption failure},\qquad
-\sqcup:\text{ disjoint union}.
+\mathcal{M}_\lambda,\mathcal{C}_\lambda&:\text{ message and ciphertext spaces},\\
+pk,sk&:\text{ public and secret keys},\\
+m,ct,m'&:\text{ message, ciphertext, decryption output},\\
+\bot&:\text{ decryption failure}.
 \end{aligned}
+\]
+\[
+\mathcal{K}_{\mathrm{pub},\lambda},\mathcal{K}_{\mathrm{sec},\lambda},
+\mathcal{M}_\lambda,\mathcal{C}_\lambda\subseteq\{0,1\}^{*},
+\qquad\bot\notin\{0,1\}^{*}.
 \]
 \end{definition}
 
 \begin{definition}[Perfect correctness]
 \[
 \mathrm{PerfectCorrect}(\Pi)\iff
-\forall\lambda\in\mathbb{N}_{>0}\ 
+\forall\lambda\in\mathbb{N}\ 
 \forall(pk,sk)\in\mathsf{Gen}(1^\lambda)\ 
 \forall m\in\mathcal{M}_\lambda:
 \]
@@ -72,6 +224,1889 @@
 \]
 \end{definition}
 
+\begin{definition}[Perfect security]
+\[
+\begin{aligned}
+\mathrm{PerfectSecure}(\Pi)\iff
+&\ \forall\lambda\in\mathbb{N}\;
+\forall(pk,sk)\in\mathsf{Gen}(1^\lambda)\\
+&\ \forall m_0,m_1\in\mathcal{M}_\lambda\;
+\forall ct\in\mathcal{C}_\lambda:\\[3pt]
+&\quad |m_0|=|m_1|\ \Longrightarrow\
+\Pr_r[\mathsf{Enc}(pk,m_0;r)=ct]
+=\Pr_r[\mathsf{Enc}(pk,m_1;r)=ct].
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ public key encryption scheme},\\
+\lambda&:\text{ security parameter},\\
+pk,sk&:\text{ generated public and secret keys},\\
+\mathcal{M}_\lambda,\mathcal{C}_\lambda&:\text{ message and ciphertext spaces},\\
+m_0,m_1&:\text{ messages of equal length},\\
+ct&:\text{ ciphertext},\\
+|m|&:\text{ bit length of }m,\\
+r&:\text{ encryption's random bits},\\
+\Pr_r&:\text{ probability over }r.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{definition}[Perfect security: conditional probabilities]
+\[
+\mathcal{M}_{\lambda,\ell}:=\{m\in\mathcal{M}_\lambda:|m|=\ell\}.
+\]
+\[
+\begin{aligned}
+\mathrm{PerfectSecure}_{\mathrm{cond}}(\Pi)\iff
+&\ \forall\lambda\in\mathbb{N}\;
+\forall(pk,sk)\in\mathsf{Gen}(1^\lambda)\;
+\forall\ell\in\mathbb{N}\cup\{0\}\\
+&\ \forall D\text{ on }\mathcal{M}_{\lambda,\ell}\;
+\forall m\in\mathcal{M}_{\lambda,\ell}\;
+\forall ct\in\mathcal{C}_\lambda:\\[2pt]
+&\quad\Pr[PK=pk,C=ct]>0\ \Longrightarrow\\
+&\qquad\Pr[M=m\mid PK=pk,C=ct]=\Pr[M=m],\\[3pt]
+&(PK,SK)\leftarrow\mathsf{Gen}(1^\lambda),\quad
+M\leftarrow D,\quad C\leftarrow\mathsf{Enc}(PK,M).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\ell&:\text{ fixed message length},\\
+\mathcal{M}_{\lambda,\ell}&:\text{ messages of length }\ell,\\
+D&:\text{ arbitrary message distribution},\\
+PK,SK&:\text{ public and secret key random variables},\\
+pk&:\text{ public key value on which we condition},\\
+M,C&:\text{ message and ciphertext random variables},\\
+\Pr&:\text{ probability over independent key generation, message sampling,}\\
+&\phantom{:}\text{ and encryption randomness}.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{lemma}[Equivalence of perfect-security definitions]
+\[
+\mathrm{PerfectSecure}(\Pi)
+\iff\mathrm{PerfectSecure}_{\mathrm{cond}}(\Pi).
+\]
+\end{lemma}
+\begin{proof}
+\[
+\begin{aligned}
+\lambda,\ (pk,sk),\ \ell&:\text{ fixed allowed parameter, generated keys, and length},\\
+\Pr_{pk}[E]&:=\Pr[E\mid PK=pk],\\
+q_m(ct)&:=\Pr_r[\mathsf{Enc}(pk,m;r)=ct],\\
+p_m&:=\Pr[M=m]=\Pr_{pk}[M=m]\qquad(M\perp PK).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+(\Longrightarrow)\quad
+&q_m(ct)=q(ct)\quad\forall m\in\mathcal{M}_{\lambda,\ell}\\
+&\Longrightarrow\quad
+\Pr_{pk}[C=ct]=\sum_{u\in\mathcal{M}_{\lambda,\ell}}p_uq_u(ct)=q(ct)\\
+&\Longrightarrow\quad
+\Pr_{pk}[M=m\mid C=ct]
+=\frac{p_mq_m(ct)}{\Pr_{pk}[C=ct]}=p_m
+\quad(\Pr_{pk}[C=ct]>0).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+(\Longleftarrow)\quad
+&m_0\ne m_1,\quad |m_0|=|m_1|=\ell,\quad
+D:=\mathrm{Uniform}(\{m_0,m_1\}),\\
+&s:=q_{m_0}(ct)+q_{m_1}(ct),\qquad \Pr_{pk}[C=ct]=s/2,\\
+&s>0\ \Longrightarrow\
+\frac{q_{m_0}(ct)}{s}
+=\Pr_{pk}[M=m_0\mid C=ct]=\frac12
+\ \Longrightarrow\ q_{m_0}(ct)=q_{m_1}(ct),\\
+&s=0\ \Longrightarrow\ q_{m_0}(ct)=q_{m_1}(ct)=0.
+\end{aligned}
+\]
+\end{proof}
+
+\begin{samepage}
+\begin{lemma}[Key-space bound for PKE]
+\[
+\mathcal{K}_{\mathrm{sec},\lambda}(pk)
+:=\{sk:(pk,sk)\in\mathsf{Gen}(1^\lambda)\}.
+\]
+\[
+\begin{aligned}
+&\mathrm{PerfectCorrect}(\Pi)\land\mathrm{PerfectSecure}_{\mathrm{cond}}(\Pi)\\
+&\Longrightarrow\quad
+\forall\lambda\in\mathbb{N}\;
+\forall(pk,sk)\in\mathsf{Gen}(1^\lambda)\;
+\forall\ell\in\mathbb{N}\cup\{0\}:\quad
+|\mathcal{K}_{\mathrm{sec},\lambda}(pk)|\ge|\mathcal{M}_{\lambda,\ell}|.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\mathcal{K}_{\mathrm{sec},\lambda}(pk)&:\text{ generated secret keys compatible with }pk,\\
+\mathcal{M}_{\lambda,\ell}&:\text{ supported messages of length }\ell.
+\end{aligned}
+\]
+\end{lemma}
+\begin{proof}
+\[
+\lambda,pk,\ell:\text{ fixed},\quad
+\mathcal{M}_{\lambda,\ell}\ne\varnothing,\quad
+M\leftarrow\mathrm{Uniform}(\mathcal{M}_{\lambda,\ell}),\qquad
+ct:\ \Pr[PK=pk,C=ct]>0.
+\]
+\[
+\begin{aligned}
+\forall m\in\mathcal{M}_{\lambda,\ell}:\quad
+&\Pr[M=m\mid PK=pk,C=ct]=\frac{1}{|\mathcal{M}_{\lambda,\ell}|}>0\\
+\Longrightarrow\quad
+&\exists sk_m\in\mathcal{K}_{\mathrm{sec},\lambda}(pk):\quad
+\Pr[PK=pk,SK=sk_m,M=m,C=ct]>0\\
+\Longrightarrow\quad
+&\Pr_s[\mathsf{Dec}(sk_m,ct;s)=m]=1.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+&m\ne m'\ \Longrightarrow\ sk_m\ne sk_{m'}\\
+&\Longrightarrow\ (m\mapsto sk_m)\text{ is injective}\\
+&\Longrightarrow\ |\mathcal{K}_{\mathrm{sec},\lambda}(pk)|
+\ge|\mathcal{M}_{\lambda,\ell}|.
+\end{aligned}
+\]
+\[
+\mathcal{M}_{\lambda,\ell}=\varnothing
+\ \Longrightarrow\ |\mathcal{K}_{\mathrm{sec},\lambda}(pk)|\ge0.
+\]
+\end{proof}
+\end{samepage}
+\[
+\begin{aligned}
+\mathcal{M}_\lambda=\{0,1\}^{*},\quad
+|sk|\le p(\lambda)\quad(p\in\poly)
+&\Longrightarrow\
+|\mathcal{K}_{\mathrm{sec},\lambda}(pk)|\le2^{p(\lambda)+1}-1,\\
+\ell>p(\lambda)+1
+&\Longrightarrow\
+|\mathcal{M}_{\lambda,\ell}|=2^\ell
+>|\mathcal{K}_{\mathrm{sec},\lambda}(pk)|.
+\end{aligned}
+\]
+
+\setcounter{problem}{2}
+\begin{problem}[Exercise sheet 1: Perfect Secrecy]
+Prove that perfect secrecy is impossible for PKE schemes.
+\end{problem}
+\[
+\begin{aligned}
+\mathrm{PerfectCorrect}(\Pi),\quad
+\lambda\in\mathbb{N},\quad (pk,sk)\in\mathsf{Gen}(1^\lambda),\\
+m_0,m_1\in\mathcal{M}_\lambda,\quad m_0\ne m_1,\quad |m_0|=|m_1|=\ell.
+\end{aligned}
+\]
+\begin{proof}[Solution 1: ciphertext distributions]
+\[
+q_i(ct):=\Pr_r[\mathsf{Enc}(pk,m_i;r)=ct]\qquad(i\in\{0,1\}).
+\]
+\[
+\begin{aligned}
+&\exists ct\in\mathcal{C}_\lambda:\\
+&\quad q_0(ct)>0\ \Longrightarrow\quad
+\Pr_s[\mathsf{Dec}(sk,ct;s)=m_0]=1,\\
+&\quad q_1(ct)>0\ \Longrightarrow\
+\Pr_s[\mathsf{Dec}(sk,ct;s)=m_1]=1,\\
+&\quad m_0\ne m_1\ \Longrightarrow\
+\Pr_s[\mathsf{Dec}(sk,ct;s)=m_0]
++\Pr_s[\mathsf{Dec}(sk,ct;s)=m_1]\le1\\
+&\quad\Longrightarrow\quad
+\bigl(q_1(ct)=0\land q_0(ct)>0\bigr)
+\lor\bigl(q_1(ct)>0\land q_0(ct)=0\bigr)
+\ \Longrightarrow\ q_1(ct)\ne q_0(ct)\\
+&\quad\Longrightarrow\quad\neg\mathrm{PerfectSecure}(\Pi).
+\end{aligned}
+\]
+\[
+r,s:\text{ encryption and decryption random bits}.
+\]
+\end{proof}
+
+\begin{samepage}
+\begin{proof}[Solution 2: conditional probabilities]
+\[
+\begin{aligned}
+\mathsf{Find}_\lambda(pk):\quad
+&r\in\{0,1\}^{*}\text{ enumerated by increasing length}:\\
+&\mathsf{Gen}(1^\lambda;r)=(pk,sk')\ \Longrightarrow\ \text{return }sk',\\
+A_\lambda(pk,ct)&:=\mathsf{Dec}(\mathsf{Find}_\lambda(pk),ct).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+(pk,sk)\in\mathsf{Gen}(1^\lambda)
+&\Longrightarrow\ \mathsf{Find}_\lambda(pk)\text{ terminates},\\
+&\Longrightarrow\ (pk,\mathsf{Find}_\lambda(pk))\in\mathsf{Gen}(1^\lambda),\\
+&\Longrightarrow\ \Pr[A_\lambda(pk,\mathsf{Enc}(pk,m))=m]=1.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+&D:=\mathrm{Uniform}(\{m_0,m_1\}),\quad
+(PK,SK)\leftarrow\mathsf{Gen}(1^\lambda),\quad
+M\leftarrow D,\quad C\leftarrow\mathsf{Enc}(PK,M),\\
+&\Pr[A_\lambda(PK,C)=M]=1,\qquad \Pr[M=m_0]=\tfrac12,\\
+&ct:\quad\Pr_r[\mathsf{Enc}(pk,m_0;r)=ct]>0\\
+&\Longrightarrow\quad\Pr[PK=pk,C=ct]>0,\\
+&\Pr[A_\lambda(pk,ct)=m_0]=1\\
+&\Longrightarrow\quad\Pr[M=m_0\mid PK=pk,C=ct]=1\ne\tfrac12=\Pr[M=m_0]\\
+&\Longrightarrow\quad\neg\mathrm{PerfectSecure}_{\mathrm{cond}}(\Pi).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\mathsf{Find}_\lambda&:\text{ exhaustive search for a compatible secret key},\\
+A_\lambda&:\text{ attacker with no polynomial runtime restriction},\\
+D&:\text{ message distribution independent of key generation}.
+\end{aligned}
+\]
+\end{proof}
+\end{samepage}
+
+
+\begin{definition}[Semantic security]
+\[
+\begin{aligned}
+\mathrm{SemanticSecure}(\Pi)\iff
+&\ \forall\text{ PPT }A\;\exists\text{ PPT }A'
+\;\forall\text{ PPT }\mathsf{Samp}\;\forall\text{ PT }f:\\
+&\quad \forall\lambda\in\mathbb{N}:\quad
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|\leq\negl(\lambda).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\epsilon_A(\lambda)&:=\Pr\!\left[
+\begin{array}{l}
+(pk,sk)\leftarrow\mathsf{Gen}(1^\lambda)\\
+(m,h)\leftarrow\mathsf{Samp}(pk)
+\end{array}
+\ :\ A(pk,h,\mathsf{Enc}(pk,m))=f(m,h)
+\right],\\[5pt]
+\epsilon_{A'}(\lambda)&:=\Pr\!\left[
+\begin{array}{l}
+(pk,sk)\leftarrow\mathsf{Gen}(1^\lambda)\\
+(m,h)\leftarrow\mathsf{Samp}(pk)
+\end{array}
+\ :\ A'(pk,h,|m|)=f(m,h)
+\right].
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ public key encryption scheme},\\
+A&:\text{ attacker given the public key, hint, and ciphertext},\\
+A'&:\text{ simulator given the public key, hint, and message length},\\
+\mathsf{Samp}&:\text{ sampler returning }(m,h)\text{ with }m\in\mathcal{M}_\lambda,\\
+h&:\text{ hint containing public information about }m,\\
+f&:\text{ deterministic polynomial-time function of }(m,h),\\
+\epsilon_A,\epsilon_{A'}&:\text{ probabilities of correctly computing }f(m,h),\\
+\negl&:\text{ negligible bound},\\
+\lambda&:\text{ security parameter},\\
+\Pr&:\text{ probability over all random bits in the experiment}.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{samepage}
+\begin{definition}[Security game]
+\[
+\mathsf{G}^{A}(1^\lambda)\longrightarrow w\in\{0,1\},
+\qquad A\text{ wins}\iff w=1.
+\]
+\[
+\begin{aligned}
+\mathsf{G}&:\text{ randomized experiment specifying a challenger,}\\
+&\phantom{:}\text{ permitted interactions, and a winning condition},\\
+A&:\text{ attacker interacting with the challenger},\\
+\lambda&:\text{ security parameter},\\
+w&:\text{ experiment's output bit; }1\text{ means a win},\\
+\Pr[\mathsf{G}^{A}(1^\lambda)=1]&:\text{ winning probability over all participants' random bits}.
+\end{aligned}
+\]
+\end{definition}
+
+\end{samepage}
+
+\begin{samepage}
+\begin{definition}[IND-CPA game]
+\[
+\mathsf{G}^{\mathrm{IND\text{-}CPA}}_{\Pi,A}(1^\lambda):
+\qquad
+\begin{array}{c@{\quad}c@{\quad}c}
+\text{Challenger}& &\text{Attacker }A=(A_0,A_1)\\[5pt]
+(pk,sk)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\quad pk\quad}&\\
+&& (m_0,m_1,st)\leftarrow A_0(pk)\\
+&&m_0\ne m_1\in\mathcal{M}_\lambda,\quad |m_0|=|m_1|\\
+&\xleftarrow{\quad m_0,m_1\quad}&\\
+b\leftarrow_{\$}\{0,1\}&&\\
+ct\leftarrow\mathsf{Enc}(pk,m_b)
+&\xrightarrow{\quad ct\quad}&\\
+&&b^*\leftarrow A_1(st,ct)\\
+&\xleftarrow{\quad b^*\quad}&\\
+\mathrm{return}\ \mathbf{1}[b^*=b]&&
+\end{array}
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ public key encryption scheme},\\
+\lambda&:\text{ security parameter},\\
+\mathsf{G}^{\mathrm{IND\text{-}CPA}}_{\Pi,A}&:\text{ indistinguishability game under chosen-plaintext attack},\\
+A=(A_0,A_1)&:\text{ two-stage attacker},\\
+A_0&:\text{ attacker selecting }m_0\ne m_1\in\mathcal{M}_\lambda,
+\ |m_0|=|m_1|,\\
+A_1&:\text{ attacker returning a guess }b^*\in\{0,1\},\\
+\text{admissible }A&:\text{ attacker always satisfying these message and guess conditions},\\
+st&:\text{ attacker's state passed from }A_0\text{ to }A_1,\\
+b&:\text{ uniformly sampled hidden bit},\\
+ct&:\text{ challenge ciphertext encrypting }m_b,\\
+\leftarrow_{\$}&:\text{ uniform sampling},\\
+\mathbf{1}[E]&:\text{ }1\text{ if }E\text{ holds, and }0\text{ otherwise}.
+\end{aligned}
+\]
+\end{definition}
+\end{samepage}
+
+\pagebreak[0]
+\begin{samepage}
+\begin{definition}[IND-CPA security]
+\[
+\begin{aligned}
+P_{\Pi,A,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)
+&:=\Pr\!\left[\mathsf{G}^{\mathrm{IND\text{-}CPA}}_{\Pi,A}(1^\lambda)=1\right]
+=\Pr[b^*=b],\\
+\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,A}(\lambda)
+&:=2\left|P_{\Pi,A,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)-\frac12\right|.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi)\iff
+&\ \forall\text{ admissible PPT }A=(A_0,A_1):\\
+&\quad\forall\lambda\in\mathbb{N}:\quad
+\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,A}(\lambda)\leq\negl(\lambda).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ public key encryption scheme},\\
+\mathrm{IND}&:\text{ indistinguishability},\\
+\mathrm{CPA}&:\text{ chosen-plaintext attack},\\
+A&:\text{ admissible attacker in the IND-CPA game},\\
+P_{\Pi,A,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)&:\text{ winning probability in the IND-CPA game},\\
+\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,A}&:\text{ twice the absolute deviation from random-guess success},\\
+\negl&:\text{ negligible bound},\\
+\Pr&:\text{ probability over key generation, encryption, }b,
+\text{ and }A\text{'s randomness}.
+\end{aligned}
+\]
+\end{definition}
+
+\end{samepage}
+
+\pagebreak[3]
+\begin{samepage}
+\begin{definition}[Concrete IND-CPA security; lecture Definition 1.5]
+\[
+\begin{aligned}
+\Pi\text{ is }(t,\epsilon)\text{-IND-CPA secure}\iff
+&\ \forall\text{ admissible PPT }A\;\forall\lambda\in\mathbb{N}:\\
+&\quad T_A(\lambda)\leq t(\lambda)
+\ \Longrightarrow\
+\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,A}(\lambda)\leq\epsilon(\lambda).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ public key encryption scheme},\\
+A&:\text{ admissible attacker in the IND-CPA game},\\
+\lambda&:\text{ security parameter},\\
+T_A(\lambda)&:\text{ worst-case total runtime of }A_0\text{ and }A_1
+\text{ in the game},\\
+t(\lambda)&:\text{ attacker runtime bound},\\
+\epsilon(\lambda)&:\text{ advantage bound},\\
+\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,A}(\lambda)&:\text{ advantage defined above}.
+\end{aligned}
+\]
+\end{definition}
+\end{samepage}
+
+\begin{theorem}[Semantic security $\iff$ IND-CPA]
+\[
+\mathrm{SemanticSecure}(\Pi)
+\iff\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi).
+\]
+\[
+\begin{aligned}
+\Pi&:\text{ public key encryption scheme}.
+\end{aligned}
+\]
+\end{theorem}
+
+\begin{proof}[First direction: semantic security $\Longrightarrow$ IND-CPA]
+\[
+\begin{aligned}
+\text{Contrapositive goal:}\quad
+&\left[\begin{gathered}
+\exists\text{ PPT }D:\quad
+\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,D}\text{ non-negligible}
+\end{gathered}\right]\\
+&\quad\Longrightarrow\quad
+\left[\begin{gathered}
+\exists\text{ PPT }A\;\forall\text{ PPT }A'\;
+\exists\text{ PPT }\mathsf{Samp}\;\exists\text{ PT }f:\\
+|\epsilon_A-\epsilon_{A'}|\text{ non-negligible}
+\end{gathered}\right].
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\text{Idea:}\quad
+&\left[\begin{gathered}
+\exists\text{ PPT }A\;\exists\text{ PPT }\mathsf{Samp}\;
+\exists\text{ PT }f\;\forall\text{ PPT }A':\\
+\exists\text{ polynomial }p\geq1\;
+\forall\lambda\in\mathbb{N}:\\
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+\geq\frac{\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,D}(\lambda)}{p(\lambda)}
+-\negl(\lambda)
+\end{gathered}\right]\\
+&\quad\overset{\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,D}\text{ non-negligible}}{\Longrightarrow}\quad
+\forall\text{ PPT }A':\quad
+|\epsilon_A-\epsilon_{A'}|\text{ non-negligible}.
+\end{aligned}
+\]
+\[
+\neg\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi)
+\ \Longrightarrow\
+\exists\text{ PPT }D=(D_0,D_1):\quad
+\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,D}\text{ non-negligible}.
+\]
+\[
+\begin{aligned}
+&D^{(0)}:=(D_0,D_1),\qquad D^{(1)}:=(D_0,1-D_1),\\
+&P_{\Pi,D^{(1)},\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)=1-P_{\Pi,D^{(0)},\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda),\\
+&\max_{i\in\{0,1\}}P_{\Pi,D^{(i)},\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)
+=\frac12+\frac12\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,D}(\lambda),\\
+&\Longrightarrow\quad
+\exists i\in\{0,1\}:\\
+&\qquad P_{\Pi,D^{(i)},\mathrm{win}}^{\mathrm{IND\text{-}CPA}}-\frac12
+\text{ non-negligibly positive},\\
+&D:=D^{(i)}.
+\end{aligned}
+\tag{1}\label{eq:indcpa-positive-gap}
+\]
+\[
+\begin{aligned}
+\mathsf{Samp}(pk):\quad
+&(m_0,m_1,st)\leftarrow D_0(pk);\\
+&b\leftarrow_{\$}\{0,1\};\\
+&\mathrm{return}\ (m_b,(m_0,m_1,st));\\[4pt]
+f(m_b,(m_0,m_1,st))&:=\mathbf{1}[m_b\ne m_0]=b;\\[4pt]
+A(pk,(m_0,m_1,st),ct)&:=D_1(st,ct).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\epsilon_A(\lambda)
+&=\Pr\!\left[
+\begin{array}{l}
+(pk,sk)\leftarrow\mathsf{Gen}(1^\lambda)\\
+(m_b,h)\leftarrow\mathsf{Samp}(pk)
+\end{array}
+\ :\ A(pk,h,\mathsf{Enc}(pk,m_b))=f(m_b,h)\right]\\[6pt]
+&=\Pr\!\left[
+\begin{array}{l}
+(pk,sk)\leftarrow\mathsf{Gen}(1^\lambda)\\
+(m_0,m_1,st)\leftarrow D_0(pk)\\
+b\leftarrow_{\$}\{0,1\}
+\end{array}
+\ :\ D_1(st,\mathsf{Enc}(pk,m_b))=b\right]\\[6pt]
+&=P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+&\forall\text{ PPT }A':\quad
+b\text{ independent of }(pk,h,|m_b|),\\
+&\qquad Y:=A'(pk,h,|m_b|),\\
+&\qquad\epsilon_{A'}(\lambda)=\Pr[Y=b]\\
+&\qquad\quad=\Pr[b=0\land Y=0]+\Pr[b=1\land Y=1]\\
+&\qquad\quad=\Pr[b=0]\Pr[Y=0]+\Pr[b=1]\Pr[Y=1]\\
+&\qquad\quad=\frac12\Pr[Y=0]+\frac12\Pr[Y=1]\\
+&\qquad\quad=\frac12\bigl(\Pr[Y=0]+\Pr[Y=1]\bigr)
+\leq\frac12\cdot1=\frac12,\\
+&\qquad|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+\geq P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)-\frac12,\\
+&\overset{\eqref{eq:indcpa-positive-gap}}{\Longrightarrow}\quad
+\exists\text{ PPT }A\;\forall\text{ PPT }A'\;
+\exists\text{ PPT }\mathsf{Samp}\;\exists\text{ PT }f:\\
+&\qquad|\epsilon_A-\epsilon_{A'}|\text{ non-negligible}\\
+&\Longrightarrow\quad\neg\mathrm{SemanticSecure}(\Pi).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+D&:\text{ IND-CPA attacker, with its guess flipped if needed},\\
+P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)&:\text{ winning probability of }D,\\
+\mathsf{Samp}&:\text{ sampler choosing uniformly between }D\text{'s messages},\\
+h=(m_0,m_1,st)&:\text{ hint independent of the hidden bit }b,\\
+f&:\text{ function identifying which distinct message was sampled},\\
+A&:\text{ semantic attacker running }D_1,\\
+A'&:\text{ arbitrary simulator given only }pk,h,|m_b|.
+\end{aligned}
+\]
+\end{proof}
+
+\begin{proof}[By direct proof: IND-CPA $\Longrightarrow$ semantic security]
+\leavevmode\par\smallskip\hrule\medskip
+\[
+\begin{aligned}
+\text{Goal:}\quad
+&\left[\begin{gathered}
+\forall\text{ PPT }D\;
+\forall\lambda\in\mathbb{N}:\\
+\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,D}(\lambda)\leq\negl(\lambda)
+\end{gathered}\right]\\
+&\quad\Longrightarrow\quad
+\left[\begin{gathered}
+\forall\text{ PPT }A\;\exists\text{ PPT }A'\;
+\forall\text{ PPT }\mathsf{Samp}\;\forall\text{ PT }f:\\
+\forall\lambda\in\mathbb{N}:\quad
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|\leq\negl(\lambda)
+\end{gathered}\right].
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\text{Idea:}\quad
+&\left[\begin{gathered}
+\exists\text{ PPT }D\;\exists\text{ polynomial }p\;
+\forall\lambda\in\mathbb{N}:\\
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+\leq p(\lambda)\,\mathrm{Adv}^{\mathrm{IND\text{-}CPA}}_{\Pi,D}(\lambda)
++\negl(\lambda)
+\end{gathered}\right]\\
+&\quad\overset{\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi)}{\Longrightarrow}\quad
+|\epsilon_A-\epsilon_{A'}|\text{ negligible}.
+\end{aligned}
+\]
+\renewcommand{\qedsymbol}{}
+\[
+\forall\text{ PPT }D:\quad
+\underbrace{2\left|P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)-\frac12\right|}_{\mathrm{Adv}_{\Pi,D}^{\mathrm{IND\text{-}CPA}}(\lambda)}
+\overset{\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi)}{\leq}\negl(\lambda).
+\tag{2}\label{eq:indcpa-negligible-bound}
+\]
+\[
+\text{Idea 2:}\quad\text{Construct the IND-CPA game for Idea 1.}
+\]
+We want to construct an IND-CPA attacker $D$ so that both
+$\epsilon_A$ and $\epsilon_{A'}$ appear in its winning probability.
+This would let us relate their difference to $D$'s advantage, as required
+by Idea 1. The IND-CPA game already provides a challenge bit $b$ with
+two possible values. We use these two branches to include both executions
+in the same game. When $b=0$, this runs $A$ on an
+encryption of $m$, giving the real execution. When $b=1$, it runs $A$ on
+an encryption of $0^{|m|}$, which is exactly how $A'$ is defined below.
+Thus the probabilities of correctly computing $f(m,h)$ in the two branches
+are $\epsilon_A$ and $\epsilon_{A'}$. We can then use them to calculate
+$D$'s winning probability and advantage in this one IND-CPA game,
+and thereby bound the semantic-security gap.
+\[
+\forall\text{ PPT }A:\quad
+A'(pk,h,\ell):=A(pk,h,\mathsf{Enc}(pk,0^\ell)).
+\]
+\[
+\begin{aligned}
+A'&\text{ depends only on }A\text{ and }\Pi,\\
+\forall\text{ PPT }\mathsf{Samp}\;\forall\text{ PT }f:\quad
+D&=(D')^A\text{ uses the chosen }\mathsf{Samp}\text{ and }f.
+\end{aligned}
+\]
+\par\pagebreak[0]
+\begin{samepage}
+\begingroup\small
+\[
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{IND-CPA challenger}}&\multicolumn{3}{c}{D=(D')^A}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}D'&&A\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{14pt}D_1}\\[3pt]
+\cline{3-5}
+(pk,sk)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk\ }&&&\\
+&&(m,h)\leftarrow\mathsf{Samp}(pk)&&\\
+&&m_0:=m,\quad m_1:=0^{|m|}&&\\
+&&m_0\ne m_1&&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{14pt}D_2}\\[3pt]
+\cline{3-5}
+b\leftarrow_{\$}\{0,1\}&&&&\\
+ct\leftarrow\mathsf{Enc}(pk,m_b)
+&\xrightarrow{\ ct\ }&&&\\
+&&&\xrightarrow{\ pk,h,ct\ }&\\
+&&&&x\leftarrow A(pk,h,ct)\\
+&&&\xleftarrow{\ x\ }&\\
+&&b^*:=\begin{cases}
+0,&x=f(m,h),\\
+1,&x\ne f(m,h)
+\end{cases}&&\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ \mathbf{1}[b^*=b]&&&&\\[3pt]
+\cline{3-5}
+\end{array}
+\]
+\endgroup
+\end{samepage}
+\[
+\begin{aligned}
+\Pr[D\text{ wins}\mid b=0]
+&=\Pr[A(pk,h,\mathsf{Enc}(pk,m))=f(m,h)]\\
+&=\epsilon_A(\lambda),\\[4pt]
+\Pr[D\text{ wins}\mid b=1]
+&=\Pr[A'(pk,h,|m|)\ne f(m,h)]\\
+&=1-\Pr[A'(pk,h,|m|)=f(m,h)]\\
+&=1-\epsilon_{A'}(\lambda).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)
+&=\Pr[D\text{ wins}\mid b=0]\Pr[b=0]\\
+&\quad+\Pr[D\text{ wins}\mid b=1]\Pr[b=1]\\
+&=\frac12\epsilon_A(\lambda)+\frac12(1-\epsilon_{A'}(\lambda))\\
+&=\frac12+\frac12\bigl(\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)\bigr).
+\end{aligned}
+\]
+\par\medskip\noindent
+\begin{minipage}[t][5.6cm][t]{0.48\linewidth}
+\vspace{0pt}
+{\small\itshape Direct conclusion\par}
+\smallskip\hrule\medskip
+\centering
+\resizebox{\linewidth}{!}{$\displaystyle
+\begin{aligned}
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+&=2\left|P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)-\frac12\right|\\
+&\overset{\eqref{eq:indcpa-negligible-bound}}{\leq}\negl(\lambda).
+\end{aligned}
+$}
+\vfill\hrule
+\end{minipage}
+\hfill
+\begin{minipage}[t][5.6cm][t]{0.48\linewidth}
+\vspace{0pt}
+{\raggedleft\small\itshape By contraposition\par}
+\smallskip\hrule\medskip
+\centering
+\resizebox{\linewidth}{!}{$\displaystyle
+\begin{aligned}
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+&\text{ non-negligible}\\
+\Longrightarrow\quad
+\Adv_{\Pi,D}^{\mathrm{IND\text{-}CPA}}(\lambda)
+&=2\left|P_{\Pi,D,\mathrm{win}}^{\mathrm{IND\text{-}CPA}}(\lambda)-\frac12\right|\\
+&=|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|
+\quad\text{non-negligible}\\
+&\overset{\mathrm{IND\text{-}CPA\text{-}Secure}(\Pi)}{\Longrightarrow}\bot.
+\end{aligned}
+$}
+\smallskip
+\resizebox{\linewidth}{!}{$\displaystyle
+\Longrightarrow\quad
+|\epsilon_A(\lambda)-\epsilon_{A'}(\lambda)|\leq\negl(\lambda).
+$}
+\vfill\hrule
+\end{minipage}
+\par\medskip
+\hrule\medskip
+\end{proof}
+
+\subsection*{Questions}
+\begin{enumerate}
+\item Is $|m_0|=|m_1|$ a standing assumption throughout the lectures
+whenever two messages are compared, or must this restriction be stated
+explicitly in each definition where it applies?
+If so, does this also apply to perfect security?
+\item Would it be better to allow arbitrary PPT attackers and have the
+IND-CPA challenger explicitly check that $m_0,m_1\in\mathcal{M}_\lambda$,
+$m_0\ne m_1$, and $|m_0|=|m_1|$, rather than restrict to admissible
+attackers? If a check fails, could the game return a uniformly random
+bit, so the winning probability is $1/2$ and the advantage is zero?
+\item Does it make sense to include explicit public key, secret key,
+and ciphertext spaces
+$\mathcal{K}_{\mathrm{pub},\lambda}$,
+$\mathcal{K}_{\mathrm{sec},\lambda}$, and $\mathcal{C}_\lambda$
+in the PKE definition, as written above, even though the lecture
+specifies only the message space?
+\item The lecture uses both right-pointing and left-pointing arrows,
+but its initial notation definition specifies the left-pointing arrow
+for sampling algorithm outputs. In our PKE definition, we write
+$\mathsf{Gen}(1^\lambda)\longrightarrow(pk,sk)$.
+Is this consistent with that notation definition, or should we write
+$(pk,sk)\leftarrow\mathsf{Gen}(1^\lambda)$ instead?
+\item The exercise solutions define perfect secrecy by
+$\Pr[M=m\mid C=c]=\Pr[M=m]$.
+For PKE, should the public key also be included in the conditioning,
+since the attacker observes both $pk$ and $ct$?
+\end{enumerate}
+
 \section{Lecture 2}
+
+\clearpage
+\section{Lecture 3}
+
+\begin{definition}[IND-CCA1 game]
+\[
+\begin{aligned}
+A&=(A_1,A_2,A_3),\qquad (st,a):=(\varepsilon,\varepsilon).
+\end{aligned}
+\]
+\begingroup\small
+\[
+\begin{array}{c@{\qquad}c@{\qquad}c}
+\multicolumn{3}{c}{G_{\Pi,A}^{\mathrm{IND\text{-}CCA1}}(1^\lambda)}\\[7pt]
+\text{Challenger}&&A\\[7pt]
+(pk,sk)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk\ }&\\[6pt]
+\multicolumn{3}{c}{\text{Before the challenge: repeat until }A_1\text{ outputs }\mathsf{stop}}\\[5pt]
+&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&\xleftarrow{\ ct\ }&ct\ne\mathsf{stop}\\
+a\leftarrow\mathsf{Dec}(sk,ct)
+&\xrightarrow{\ a\ }&\\[8pt]
+\multicolumn{3}{c}{\text{Challenge phase: no further decryption queries}}\\[5pt]
+&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&m_0\ne m_1\in\mathcal M_\lambda,\quad |m_0|=|m_1|\\
+&\xleftarrow{\ m_0,m_1\ }&\\
+b\leftarrow_{\$}\{0,1\}&&\\
+ct^*\leftarrow\mathsf{Enc}(pk,m_b)
+&\xrightarrow{\ ct^*\ }&\\[5pt]
+&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+\mathrm{return}\ \mathbf1[b^*=b]&&
+\end{array}
+\]
+\endgroup
+\[
+\begin{aligned}
+\Pi&:\text{ public-key encryption scheme }(\mathsf{Gen},\mathsf{Enc},\mathsf{Dec}),\\
+A_1&:\text{ PPT query algorithm outputting a ciphertext (or }\mathsf{stop}\text{) and state},\\
+A_2&:\text{ PPT algorithm outputting }m_0,m_1\text{ and state }st',\\
+A_3&:\text{ PPT guessing stage},\\
+st,st'&:\text{ attacker states before and after message selection},\\
+\varepsilon&:\text{ empty string initializing the state and previous answer},\\
+ct&:\text{ ciphertext chosen by }A\text{ for a decryption query},\\
+a&:\text{ decryption answer in }\mathcal M_\lambda\cup\{\bot\},\\
+ct^*&:\text{ challenge ciphertext},\\
+b&:\text{ uniformly random hidden bit},\\
+b^*&:\text{ bit output by }A,\\
+\mathrm{CCA1}&:\text{ chosen-ciphertext attack with decryption access only before the challenge}.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{definition}[IND-CCA1 security]
+\[
+\begin{aligned}
+P_{\Pi,A,\mathrm{win}}^{\mathrm{IND\text{-}CCA1}}(\lambda)
+&:=\Pr[G_{\Pi,A}^{\mathrm{IND\text{-}CCA1}}(1^\lambda)=1],\\
+\Adv_{\Pi,A}^{\mathrm{IND\text{-}CCA1}}(\lambda)
+&:=2\left|P_{\Pi,A,\mathrm{win}}^{\mathrm{IND\text{-}CCA1}}(\lambda)-\frac12\right|,\\
+\Pi\text{ IND-CCA1-secure}
+&\iff\forall\text{ PPT }A\;\forall\lambda\in\mathbb N:\quad
+\Adv_{\Pi,A}^{\mathrm{IND\text{-}CCA1}}(\lambda)\leq\negl(\lambda).
+\end{aligned}
+\]
+\end{definition}
+
+\clearpage
+\begin{definition}[IND-CCA1 game for Naor--Yung]
+\begingroup\small
+\[
+\begin{array}{c@{\quad}c@{\quad}c}
+\multicolumn{3}{c}{G_{\Pi_{\mathrm{NY}},A}^{\mathrm{IND\text{-}CCA1}}(1^\lambda)}\\[7pt]
+\text{Challenger}&&A\\[7pt]
+(pk_i,sk_i)\leftarrow\mathsf{Gen}(1^\lambda),\ i\in\{0,1\}&&\\
+crs\leftarrow\mathsf{Setup}(1^\lambda)&&\\
+pk:=(pk_0,pk_1,crs),\quad sk:=sk_0
+&\xrightarrow{\ pk\ }&\\[7pt]
+&&(st,a):=(\varepsilon,\varepsilon)\\
+\multicolumn{3}{c}{\text{Before the challenge: repeat until }A_1\text{ outputs }\mathsf{stop}}\\[5pt]
+&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&\xleftarrow{\ ct=(c_0,c_1,\pi)\ }&ct\ne\mathsf{stop}\\
+x:=(pk_0,pk_1,c_0,c_1)&&\\
+a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(sk_0,c_0),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}
+&\xrightarrow{\ a\ }&\\[9pt]
+\multicolumn{3}{c}{\text{Challenge phase: no further decryption queries}}\\[5pt]
+&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&|m_0|=|m_1|\\
+&\xleftarrow{\ m_0,m_1\ }&\\
+b\leftarrow_{\$}\{0,1\}&&\\
+r_0^*,r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_b|}&&\\
+c_i^*:=\mathsf{Enc}(pk_i,m_b;r_i^*),\ i\in\{0,1\}&&\\
+x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+w^*:=(m_b,r_0^*,r_1^*)&&\\
+\pi^*\leftarrow\mathsf{Prove}(crs,x^*,w^*)&&\\
+ct^*:=(c_0^*,c_1^*,\pi^*)
+&\xrightarrow{\ ct^*\ }&\\[5pt]
+&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+\mathrm{return}\ \mathbf1[b^*=b]&&
+\end{array}
+\]
+\endgroup
+\[
+\begin{aligned}
+\Pi_{\mathrm{NY}}&:\text{ Naor--Yung encryption scheme built from }\Pi,\\
+\mathsf{Setup},\mathsf{Prove},\mathsf{Vfy}&:\text{ NIZK reference-string, proving, and verification algorithms},\\
+\mathcal R_{\lambda,\ell}&:\text{ encryption randomness space for messages of length }\ell,\\
+x^*&:\text{ statement that }c_0^*,c_1^*\text{ encrypt the same message},\\
+w^*&:\text{ witness containing that message and both encryption coins}.
+\end{aligned}
+\]
+Malformed decryption queries return $\bot$.
+\end{definition}
+
+\clearpage
+\begin{theorem}[IND-CCA1 security of Naor--Yung]
+\[
+\begin{gathered}
+\Pi\text{ IND-CPA-secure},\qquad
+\mathsf{NIZK}\text{ complete, sound, and zero-knowledge for }R_{\mathrm{NY}}\\
+\Longrightarrow\quad
+\Pi_{\mathrm{NY}}\text{ IND-CCA1-secure}.
+\end{gathered}
+\]
+\[
+\begin{aligned}
+R_{\mathrm{NY}}&:=\bigl\{\bigl((pk_0,pk_1,c_0,c_1),(m,r_0,r_1)\bigr):\\
+&\hspace{3em}c_0=\mathsf{Enc}(pk_0,m;r_0)\ \land\
+c_1=\mathsf{Enc}(pk_1,m;r_1)\bigr\},\\
+\Pi_{\mathrm{NY}}&:\text{ Naor--Yung construction using }\Pi\text{ and }\mathsf{NIZK}.
+\end{aligned}
+\]
+\end{theorem}
+
+\subsection*{Naor--Yung: answering decryption queries in the reduction}
+\textit{Desired reduction with only $c_0$: the decryption step is missing.}
+\begingroup\footnotesize
+\[
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{CPA challenger for }\Pi}&
+\multicolumn{3}{c}{D=(D')^A}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{20pt}D'&&A\\[6pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0\ }&&&\\[4pt]
+&&&\xrightarrow{\ pk_0\ }&\\[5pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }c_0=\mathsf{stop}}\\[5pt]
+&&&&(c_0,st)\leftarrow A_1(pk_0,st,a)\\
+&&&\xleftarrow{\ \text{decrypt }c_0\ }&c_0\ne\mathsf{stop}\\[5pt]
+&&a\overset{?}{=}\mathsf{Dec}(sk_0,c_0)&&\\
+&&\underbrace{sk_0\text{ unknown}}_{\text{no decryption oracle from CPA challenger}}&&\\[5pt]
+&&&\xrightarrow{\ a\ \text{(needed)}\ }&\\[7pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{14pt}\text{Challenge phase: no further decryption queries}}\\[5pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk_0,st)\\
+&&&&m_0,m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+b\leftarrow_{\$}\{0,1\}&&&&\\
+c_0^*\leftarrow\mathsf{Enc}(pk_0,m_b)
+&\xrightarrow{\ c_0^*\ }&&&\\[4pt]
+&&&\xrightarrow{\ c_0^*\ }&\\[6pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',c_0^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ \mathbf1[b^*=b]&&&&\\[5pt]
+\cline{3-5}
+\end{array}
+\]
+\endgroup
+\[
+\begin{aligned}
+c_0&:\text{ ciphertext chosen by }A\text{ for a decryption query},\\
+a&:\text{ decryption answer, a plaintext or }\bot,\\
+c_0^*&:\text{ challenge ciphertext},\\
+b&:\text{ hidden challenge bit},\\
+b^*&:\text{ bit output by }A.
+\end{aligned}
+\]
+The question mark is the missing step: how can $D'$ answer the
+decryption query without $sk_0$? The challenge forwarding is already
+specified, but this is not a working reduction until the decryption
+queries can be answered.
+
+\clearpage
+\[
+\text{CCA1 attack }A\text{ on }\Pi_{\mathrm{NY}}
+\quad\xrightarrow{\ \text{reduction}\ }\quad
+\text{CPA attack }D\text{ on }\Pi.
+\]
+\textit{Complete CPA interaction for the hop $G_3\to G_4$:}
+\begingroup\footnotesize
+\[
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{CPA challenger for }\Pi}&
+\multicolumn{3}{c}{D=(D')^A}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{20pt}D'&&A\\[6pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0\ }&&&\\[4pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)&&\\
+&&&\xrightarrow{\ pk=(pk_0,pk_1,crs)\ }&\\[5pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[3pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[4pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&v:=\mathsf{Vfy}(crs,x,\pi)&&\\
+&&a:=\begin{cases}
+\bot,&v=0,\\
+\mathsf{Dec}(sk_1,c_1),&v=1
+\end{cases}&&\\[4pt]
+&&&\xrightarrow{\ a\ }&\\[7pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{14pt}\text{Challenge phase: no further decryption queries}}\\[4pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&&&&m_0,m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+b\leftarrow_{\$}\{0,1\}&&&&\\
+c_0^*\leftarrow\mathsf{Enc}(pk_0,m_b)
+&\xrightarrow{\ c_0^*\ }&&&\\[4pt]
+&&c_1^*\leftarrow\mathsf{Enc}(pk_1,m_1)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[4pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ \mathbf 1[b^*=b]&&&&\\[5pt]
+\cline{3-5}
+\end{array}
+\]
+\endgroup
+\[
+\begin{aligned}
+A&:\text{ CCA1 attacker choosing ciphertexts to query},\\
+D&:\text{ CPA reduction running }A,\\
+D'&:\text{ wrapper answering queries and constructing the challenge for }A,\\
+sk_0&:\text{ secret key unknown to }D,\\
+sk_1&:\text{ independent secret key generated and known by }D,\\
+\pi&:\text{ proof that }c_0,c_1\text{ encrypt the same message},\\
+S_{\mathrm{crs}},S_{\mathrm{prf}}&:\text{ NIZK simulators for the reference string and proof},\\
+td&:\text{ simulation trapdoor known to }D,\\
+\pi^*&:\text{ simulated proof attached to the challenge},\\
+\bot&:\text{ rejected decryption query}.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+c_0=\mathsf{Enc}(pk_0,m;r_0),\quad
+c_1=\mathsf{Enc}(pk_1,m;r_1)
+\quad\Longrightarrow\quad
+\underbrace{\mathsf{Dec}(sk_0,c_0)}_{\text{actual scheme}}
+&=m=
+\underbrace{\mathsf{Dec}(sk_1,c_1)}_{\text{reduction }D}.
+\end{aligned}
+\]
+\[
+b=0\ \Longrightarrow\ A\text{ sees }G_3,
+\qquad
+b=1\ \Longrightarrow\ A\text{ sees }G_4.
+\]
+This is one hop of the proof. The simulated proof lets $D$ construct the
+challenge without knowing $m_b$ or the randomness used for $c_0^*$;
+in $G_3$, the two challenge components may encrypt different messages.
+The separate soundness hops justify switching the decryption key for
+queries made before the challenge.
+
+\clearpage
+\subsection*{Naor--Yung: sequence of games}
+\[
+\text{Goal:}\qquad
+\left|\Pr[G_0=1]-\Pr[G_6=1]\right|\leq\negl(\lambda).
+\]
+\begingroup\small
+\renewcommand{\arraystretch}{1.65}
+\[
+\begin{array}{c|cc|c|c|l}
+\text{Game}&c_0^*\text{ encrypts}&c_1^*\text{ encrypts}
+&crs,\pi^*&\text{decryption key}&\text{Change from previous row}\\
+\hline
+G_0&m_0&m_0&\text{real}&sk_0&\text{initial game}\\
+G_1&m_0&m_0&\textcolor{red}{\text{simulated}}&sk_0&\text{simulate }crs,\pi^*\text{ (ZK)}\\
+G_2&m_0&\textcolor{red}{m_1}&\text{simulated}&sk_0&\text{change }c_1^*\text{ (CPA under }pk_1\text{)}\\
+G_3&m_0&m_1&\text{simulated}&\textcolor{red}{sk_1}&\text{switch to }sk_1\text{ (soundness)}\\
+G_4&\textcolor{red}{m_1}&m_1&\text{simulated}&sk_1&\text{change }c_0^*\text{ (CPA under }pk_0\text{)}\\
+G_5&m_1&m_1&\text{simulated}&\textcolor{red}{sk_0}&\text{switch to }sk_0\text{ (soundness)}\\
+G_6&m_1&m_1&\textcolor{red}{\text{real}}&sk_0&\text{restore real }crs,\pi^*\text{ (ZK)}
+\end{array}
+\]
+\endgroup
+\[
+\begin{aligned}
+G_i&:\text{ experiment specified by row }i\text{, outputting }A\text{'s final bit},\\
+G_0&:\text{ actual Naor--Yung CCA1 interaction with challenge bit fixed to }0,\\
+G_6&:\text{ actual Naor--Yung CCA1 interaction with challenge bit fixed to }1,\\
+\text{decryption key}&:\text{ key used to answer pre-challenge queries after verification},\\
+\mathrm{ZK}&:\text{ zero knowledge of the NIZK proof system},\\
+\textcolor{red}{\text{red}}&:\text{ entry changed from the previous row}.
+\end{aligned}
+\]
+
+\clearpage
+\begin{landscape}
+\begin{definition}[Endpoint games $G_0$ and $G_6$]
+\leavevmode\par\noindent
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize
+\resizebox*{!}{12cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest challenger for }\Pi}&
+\multicolumn{3}{c}{\text{Reference experiment }G_0}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{20pt}\text{NY wrapper }H_0&&A\\[6pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[4pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&crs\leftarrow\mathsf{Setup}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[5pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[3pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[4pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&v:=\mathsf{Vfy}(crs,x,\pi)&&\\
+&&a:=\begin{cases}
+\bot,&v=0,\\
+\mathsf{Dec}(sk_0,c_0),&v=1
+\end{cases}&&\\[4pt]
+&&&\xrightarrow{\ a\ }&\\[7pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{14pt}\text{Challenge phase: no further decryption queries}}\\[4pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+b:=\textcolor{red}{0}&&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|\textcolor{red}{m_0}|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,\textcolor{red}{m_0};r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[4pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|\textcolor{red}{m_0}|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,\textcolor{red}{m_0};r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&w^*:=(\textcolor{red}{m_0},r_0^*,r_1^*)&&\\
+&&\pi^*\leftarrow\mathsf{Prove}(crs,x^*,w^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[4pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[5pt]
+\cline{3-5}
+\end{array}
+$}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize
+\resizebox*{!}{12cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest challenger for }\Pi}&
+\multicolumn{3}{c}{\text{Reference experiment }G_6}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{20pt}\text{NY wrapper }H_6&&A\\[6pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[4pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&crs\leftarrow\mathsf{Setup}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[5pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[3pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[4pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&v:=\mathsf{Vfy}(crs,x,\pi)&&\\
+&&a:=\begin{cases}
+\bot,&v=0,\\
+\mathsf{Dec}(sk_0,c_0),&v=1
+\end{cases}&&\\[4pt]
+&&&\xrightarrow{\ a\ }&\\[7pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{14pt}\text{Challenge phase: no further decryption queries}}\\[4pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+b:=\textcolor{red}{1}&&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|\textcolor{red}{m_1}|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,\textcolor{red}{m_1};r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[4pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|\textcolor{red}{m_1}|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,\textcolor{red}{m_1};r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&w^*:=(\textcolor{red}{m_1},r_0^*,r_1^*)&&\\
+&&\pi^*\leftarrow\mathsf{Prove}(crs,x^*,w^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[4pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[5pt]
+\cline{3-5}
+\end{array}
+$}
+\end{minipage}
+\[
+\begin{aligned}
+G_0,G_6&:\text{ real Naor--Yung experiments with challenge bit fixed to }0\text{ and }1,\\
+H_0,H_6&:\text{ NY wrappers receiving }sk_0,r_0^*\text{ to decrypt and generate real proofs},\\
+\textcolor{red}{\text{red}}&:\text{ entries that differ between the two experiments},\\
+b^*&:\text{ final bit output by }A\text{ and returned by each experiment}.
+\end{aligned}
+\]
+The honest challenger shares $sk_0$ and the challenge coins $r_0^*$ with the wrapper; $A$ receives neither. Malformed queries return $\bot$.
+\end{definition}
+\end{landscape}
+
+\clearpage
+\begin{landscape}
+\subsection*{Comparison $G_0\to G_1$}
+
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{0}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{0}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&\textcolor{red}{crs\leftarrow\mathsf{Setup}(1^\lambda)}&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(sk_0,c_0),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_0|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_0;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_0|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_0;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\textcolor{red}{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\textcolor{red}{\pi^*\leftarrow\mathsf{Prove}(crs,x^*,w^*)}&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\hfill
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{1}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{1}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&\textcolor{red}{(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)}&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(sk_0,c_0),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_0|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_0;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_0|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_0;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\textcolor{red}{\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)}&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\par
+
+\[
+q_k(\lambda):=\Pr[G_k(1^\lambda)=1],\qquad \epsilon_1(\lambda):=|q_1(\lambda)-q_0(\lambda)|.
+\]
+
+\[
+\begin{aligned}
+\epsilon_1(\lambda)&=\left|\Pr[\mathsf{Exp}^{\mathrm{real}}_{Z_{01}}=1]-\Pr[\mathsf{Exp}^{\mathrm{ideal}}_{Z_{01}}=1]\right|\\
+&=\Adv^{\mathrm{ZK}}_{\mathsf{NIZK},Z_{01}}(\lambda)\leq\negl(\lambda).
+\end{aligned}
+\]
+
+\noindent $Z_{01}$ runs $A$, generates both key pairs, and uses its ZK challenger for $crs,\pi^*$. The challenge statement is true: both components encrypt $m_0$. Its output is $A$'s bit.
+
+\end{landscape}
+
+\clearpage
+\begin{landscape}
+\subsection*{Comparison $G_1\to G_2$}
+
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{1}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{1}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(sk_0,c_0),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_0|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_0;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|\textcolor{red}{m_0}|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,\textcolor{red}{m_0};r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\hfill
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{2}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{2}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(sk_0,c_0),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_0|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_0;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|\textcolor{red}{m_1}|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,\textcolor{red}{m_1};r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\par
+
+\[
+q_k(\lambda):=\Pr[G_k(1^\lambda)=1],\qquad \epsilon_2(\lambda):=|q_2(\lambda)-q_1(\lambda)|.
+\]
+
+\[
+\begin{aligned}
+\Pr[C_{12}\text{ wins}]&=\frac12(1-q_1)+\frac12q_2=\frac12+\frac12(q_2-q_1),\\
+\Adv^{\mathrm{IND\text{-}CPA}}_{\Pi,C_{12}}(\lambda)&=2\left|\Pr[C_{12}\text{ wins}]-\frac12\right|=|q_2-q_1|=\epsilon_2(\lambda)\leq\negl(\lambda).
+\end{aligned}
+\]
+
+\noindent $C_{12}$ embeds its CPA challenge under $pk_1$ and knows $sk_0$ for decryption queries. Its hidden CPA bit $\beta=0$ gives $G_1$; $\beta=1$ gives $G_2$. It forwards $A$'s output as its guess.
+
+\end{landscape}
+
+\clearpage
+\begin{landscape}
+\subsection*{Comparison $G_2\to G_3$}
+
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{2}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{2}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(\textcolor{red}{sk_0},\textcolor{red}{c_0}),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_0|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_0;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_1;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\hfill
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{3}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{3}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(\textcolor{red}{sk_1},\textcolor{red}{c_1}),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_0|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_0;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_1;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\par
+
+\[
+q_k(\lambda):=\Pr[G_k(1^\lambda)=1],\qquad \epsilon_3(\lambda):=|q_3(\lambda)-q_2(\lambda)|.
+\]
+
+\[
+\begin{aligned}
+\mathsf{Bad}&:=\{\exists\text{ pre-challenge query }(c_0,c_1,\pi):\ \mathsf{Vfy}(crs,x,\pi)=1\ \land\ \mathsf{Dec}(sk_0,c_0)\ne\mathsf{Dec}(sk_1,c_1)\},\\
+\epsilon_3(\lambda)&\leq\Pr[\mathsf{Bad}\text{ in }G_2]\\
+&\leq\Adv^{\mathrm{sound}}_{\mathsf{NIZK},B_{23}}(\lambda)+\Adv^{\mathrm{ZK}}_{\mathsf{NIZK},Z_{23}}(\lambda)\leq\negl(\lambda).
+\end{aligned}
+\]
+
+\noindent Until $\mathsf{Bad}$, the two decryption answers agree (using perfect correctness). $B_{23}$ outputs an accepted inconsistent query under an honest $crs$; $Z_{23}$ bounds the change in $\Pr[\mathsf{Bad}]$ when replacing the simulated $crs$ by an honest one. All these queries precede the simulated challenge proof.
+
+\end{landscape}
+
+\clearpage
+\begin{landscape}
+\subsection*{Comparison $G_3\to G_4$}
+
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{3}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{3}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(sk_1,c_1),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|\textcolor{red}{m_0}|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,\textcolor{red}{m_0};r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_1;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\hfill
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{4}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{4}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(sk_1,c_1),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|\textcolor{red}{m_1}|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,\textcolor{red}{m_1};r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_1;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\par
+
+\[
+q_k(\lambda):=\Pr[G_k(1^\lambda)=1],\qquad \epsilon_4(\lambda):=|q_4(\lambda)-q_3(\lambda)|.
+\]
+
+\[
+\begin{aligned}
+\Pr[C_{34}\text{ wins}]&=\frac12(1-q_3)+\frac12q_4=\frac12+\frac12(q_4-q_3),\\
+\Adv^{\mathrm{IND\text{-}CPA}}_{\Pi,C_{34}}(\lambda)&=2\left|\Pr[C_{34}\text{ wins}]-\frac12\right|=|q_4-q_3|=\epsilon_4(\lambda)\leq\negl(\lambda).
+\end{aligned}
+\]
+
+\noindent $C_{34}$ embeds its CPA challenge under $pk_0$ and knows $sk_1$ for decryption queries. Its hidden CPA bit $\beta=0$ gives $G_3$; $\beta=1$ gives $G_4$. It forwards $A$'s output as its guess.
+
+\end{landscape}
+
+\clearpage
+\begin{landscape}
+\subsection*{Comparison $G_4\to G_5$}
+
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{4}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{4}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(\textcolor{red}{sk_1},\textcolor{red}{c_1}),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_1;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_1;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\hfill
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{5}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{5}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(\textcolor{red}{sk_0},\textcolor{red}{c_0}),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_1;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_1;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\par
+
+\[
+q_k(\lambda):=\Pr[G_k(1^\lambda)=1],\qquad \epsilon_5(\lambda):=|q_5(\lambda)-q_4(\lambda)|.
+\]
+
+\[
+\begin{aligned}
+\mathsf{Bad}&:=\{\exists\text{ pre-challenge query }(c_0,c_1,\pi):\ \mathsf{Vfy}(crs,x,\pi)=1\ \land\ \mathsf{Dec}(sk_0,c_0)\ne\mathsf{Dec}(sk_1,c_1)\},\\
+\epsilon_5(\lambda)&\leq\Pr[\mathsf{Bad}\text{ in }G_4]\\
+&\leq\Adv^{\mathrm{sound}}_{\mathsf{NIZK},B_{45}}(\lambda)+\Adv^{\mathrm{ZK}}_{\mathsf{NIZK},Z_{45}}(\lambda)\leq\negl(\lambda).
+\end{aligned}
+\]
+
+\noindent Until $\mathsf{Bad}$, the two decryption answers agree (using perfect correctness). $B_{45}$ outputs an accepted inconsistent query under an honest $crs$; $Z_{45}$ bounds the change in $\Pr[\mathsf{Bad}]$ when replacing the simulated $crs$ by an honest one. All these queries precede the simulated challenge proof.
+
+\end{landscape}
+
+\clearpage
+\begin{landscape}
+\subsection*{Comparison $G_5\to G_6$}
+
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{5}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{5}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&\textcolor{red}{(crs,td)\leftarrow S_{\mathrm{crs}}(1^\lambda)}&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(sk_0,c_0),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_1;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_1;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\phantom{w^*:=(m_0,r_0^*,r_1^*)}&&\\
+&&\textcolor{red}{\pi^*\leftarrow S_{\mathrm{prf}}(crs,td,x^*)}&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\hfill
+\begin{minipage}[t]{0.485\linewidth}
+\centering\footnotesize\resizebox*{!}{10.7cm}{$\displaystyle
+\begin{array}{c@{\;}c@{\;}|c@{\;}c@{\;}c|}
+\multicolumn{2}{c}{\text{Honest component challenger}}&
+\multicolumn{3}{c}{\text{Reference experiment }G_{6}}\\[3pt]
+\cline{3-5}
+&&\rule{0pt}{18pt}H_{6}&&A\\[5pt]
+(pk_0,sk_0)\leftarrow\mathsf{Gen}(1^\lambda)
+&\xrightarrow{\ pk_0,sk_0\ }&&&\\[3pt]
+&&(pk_1,sk_1)\leftarrow\mathsf{Gen}(1^\lambda)&&\\
+&&\textcolor{red}{crs\leftarrow\mathsf{Setup}(1^\lambda)}&&\\
+&&pk:=(pk_0,pk_1,crs)&&\\
+&&&\xrightarrow{\ pk\ }&\\[3pt]
+&&&&(st,a):=(\varepsilon,\varepsilon)\\
+&&\multicolumn{3}{c|}{\text{Before the challenge: repeat until }ct=\mathsf{stop}}\\[2pt]
+&&&&(ct,st)\leftarrow A_1(pk,st,a)\\
+&&&&ct=(c_0,c_1,\pi)\ne\mathsf{stop}\\
+&&&\xleftarrow{\ \text{decrypt }ct\ }&\\[3pt]
+&&x:=(pk_0,pk_1,c_0,c_1)&&\\
+&&a:=\begin{cases}
+\bot,&\mathsf{Vfy}(crs,x,\pi)=0,\\
+\mathsf{Dec}(sk_0,c_0),&\mathsf{Vfy}(crs,x,\pi)=1
+\end{cases}&&\\[3pt]
+&&&\xrightarrow{\ a\ }&\\[5pt]
+\cline{3-5}
+&&\multicolumn{3}{|c|}{\rule{0pt}{12pt}\text{Challenge phase: no further decryption queries}}\\[3pt]
+&&&&(m_0,m_1,st')\leftarrow A_2(pk,st)\\
+&&&&m_0\ne m_1\in\mathcal M_\lambda\\
+&&&&|m_0|=|m_1|\\
+&&&\xleftarrow{\ m_0,m_1\ }&\\
+&\xleftarrow{\ m_0,m_1\ }&&&\\
+r_0^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&&&\\
+c_0^*:=\mathsf{Enc}(pk_0,m_1;r_0^*)
+&\xrightarrow{\ c_0^*,r_0^*\ }&&&\\[3pt]
+&&r_1^*\leftarrow_{\$}\mathcal R_{\lambda,|m_1|}&&\\
+&&c_1^*:=\mathsf{Enc}(pk_1,m_1;r_1^*)&&\\
+&&x^*:=(pk_0,pk_1,c_0^*,c_1^*)&&\\
+&&\textcolor{red}{w^*:=(m_1,r_0^*,r_1^*)}&&\\
+&&\textcolor{red}{\pi^*\leftarrow\mathsf{Prove}(crs,x^*,w^*)}&&\\
+&&&\xrightarrow{\ ct^*=(c_0^*,c_1^*,\pi^*)\ }&\\[3pt]
+&&&\xleftarrow{\ b^*\ }&b^*\leftarrow A_3(st',ct^*)\\
+&\xleftarrow{\ b^*\ }&&&\\
+\mathrm{return}\ b^*&&&&\\[4pt]
+\cline{3-5}
+\end{array}
+$}\end{minipage}
+\par
+
+\[
+q_k(\lambda):=\Pr[G_k(1^\lambda)=1],\qquad \epsilon_6(\lambda):=|q_6(\lambda)-q_5(\lambda)|.
+\]
+
+\[
+\begin{aligned}
+\epsilon_6(\lambda)&=\left|\Pr[\mathsf{Exp}^{\mathrm{real}}_{Z_{56}}=1]-\Pr[\mathsf{Exp}^{\mathrm{ideal}}_{Z_{56}}=1]\right|\\
+&=\Adv^{\mathrm{ZK}}_{\mathsf{NIZK},Z_{56}}(\lambda)\leq\negl(\lambda).
+\end{aligned}
+\]
+
+\noindent $Z_{56}$ runs $A$, generates both key pairs, and uses its ZK challenger for $crs,\pi^*$. The challenge statement is true: both components encrypt $m_1$. Its output is $A$'s bit.
+
+\end{landscape}
+
+
+\clearpage
+\subsection*{Combining the six bounds}
+\[
+\begin{aligned}
+\Adv^{\mathrm{IND\text{-}CCA1}}_{\Pi_{\mathrm{NY}},A}(\lambda)
+&=|q_6(\lambda)-q_0(\lambda)|\\
+&\leq\sum_{i=1}^{6}\epsilon_i(\lambda)\\
+&\leq\Adv^{\mathrm{IND\text{-}CPA}}_{\Pi,C_{12}}(\lambda)
++\Adv^{\mathrm{IND\text{-}CPA}}_{\Pi,C_{34}}(\lambda)\\
+&\quad+\Adv^{\mathrm{sound}}_{\mathsf{NIZK},B_{23}}(\lambda)
++\Adv^{\mathrm{sound}}_{\mathsf{NIZK},B_{45}}(\lambda)\\
+&\quad+\Adv^{\mathrm{ZK}}_{\mathsf{NIZK},Z_{01}}(\lambda)
++\Adv^{\mathrm{ZK}}_{\mathsf{NIZK},Z_{23}}(\lambda)\\
+&\quad+\Adv^{\mathrm{ZK}}_{\mathsf{NIZK},Z_{45}}(\lambda)
++\Adv^{\mathrm{ZK}}_{\mathsf{NIZK},Z_{56}}(\lambda)\\
+&\leq\negl(\lambda).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+q_i(\lambda)&:\text{ probability that }A\text{ outputs }1\text{ in }G_i,\\
+\epsilon_i(\lambda)&:\text{ absolute difference between the output probabilities of }G_{i-1},G_i,\\
+\Adv^{\mathrm{ZK}}&:\text{ absolute difference of real and ideal ZK output probabilities},\\
+\Adv^{\mathrm{sound}}&:\text{ probability of producing an accepted false statement under an honest }crs,\\
+C_{12},C_{34}&:\text{ PPT reductions to CPA security using }A,\\
+B_{23},B_{45}&:\text{ PPT reductions to soundness using }A,\\
+Z_{01},Z_{23},Z_{45},Z_{56}&:\text{ PPT reductions to zero knowledge using }A.
+\end{aligned}
+\]
 
 \end{document}

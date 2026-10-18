@@ -1,0 +1,109 @@
+\documentclass[12pt,a4paper]{article}
+\input{../../preamble}
+
+\title{Water quality testing}
+\author{Klevis Imeri}
+\date{}
+
+\begin{document}
+\maketitle
+
+The input to the problem:
+\[
+\mathcal{I}:=\left\{
+\begin{aligned}
+N &:=\{\text{laboratories}\}, && |N|=n,\\
+T &:=\{\text{contaminants}\}, && |T|=t,\\
+M[i][j] &:=\{k\in T\mid\text{device }j\text{ from lab }i\text{ tests }k\},
+&& i\in N,\ j\in[m],\\
+c[i][j] &:=\text{purchase cost of device }j\text{ from lab }i,
+&& c[i][j]\geq0,\\
+d[i] &:=\text{delivery fee of laboratory }i, && d[i]\geq0.
+\end{aligned}
+\right\}.
+\]
+The output is a set of selected testing devices
+\[
+\mathcal{S}:=\{(i,j)\mid\text{we select device }j\text{ from laboratory }i\}.
+\]
+\[
+\operatorname{feasible}(\mathcal{S}):=
+\mathcal{S}\subseteq N\times[m]
+\ \land\
+\bigcup_{(i,j)\in\mathcal{S}}M[i][j]=T.
+\]
+The cost function is
+\[
+f(\mathcal{S}):=
+\sum_{(i,j)\in\mathcal{S}}c[i][j]
++\sum_{\substack{i\in N\\\exists j\in[m]:\,(i,j)\in\mathcal{S}}}d[i].
+\]
+
+\paragraph{Goal 1.}
+For the natural LP given in the exercise, show that:
+\[
+\forall B>0,\ \exists\mathcal{I}:\quad
+|N|=|T|=1
+\ \land\
+\mathrm{OPT}_{\mathrm{ILP}}(\mathcal{I})
+>B\,\mathrm{OPT}_{\mathrm{LP}}(\mathcal{I}).
+\]
+\[
+\begin{aligned}
+\mathrm{OPT}_{\mathrm{ILP}}(\mathcal{I})
+&:\text{ minimum cost of a feasible selection of devices},\\
+\mathrm{OPT}_{\mathrm{LP}}(\mathcal{I})
+&:\text{ optimal value of the LP given in the exercise}.
+\end{aligned}
+\]
+
+Fix an arbitrary $B>0$. We construct an instance $\mathcal{I}_B$
+depending on $B$, with one laboratory and one contaminant, such that
+\[
+\mathrm{OPT}_{\mathrm{ILP}}(\mathcal{I}_B)
+>B\,\mathrm{OPT}_{\mathrm{LP}}(\mathcal{I}_B).
+\]
+Choose one laboratory, one contaminant, and $m=?$
+devices, each testing that contaminant. Set
+\[
+d_1=1,\qquad c_{1j}=0\quad\forall j\in[m].
+\]
+Since there is only one laboratory, the LP becomes
+\[
+\begin{aligned}
+\text{minimize}\quad &d_1y_1+\sum_{j=1}^m c_{1j}x_{1j}=y_1\\
+\text{subject to}\quad &\sum_{j=1}^m x_{1j}\geq1,\\
+&x_{1j}\leq y_1 &&\forall j\in[m],\\
+&0\leq y_1,x_{1j}\leq1 &&\forall j\in[m].
+\end{aligned}
+\]
+To minimize $y_1$, we choose
+\[
+x_{1j}=y_1=\frac1m\qquad\forall j\in[m].
+\]
+This is feasible. To see that a smaller cost is impossible, suppose
+$y_1<1/m$. Since $x_{1j}\leq y_1$ for every device,
+\[
+\sum_{j=1}^m x_{1j}\leq my_1<1,
+\]
+contradicting the coverage constraint. Thus,
+\[
+\mathrm{OPT}_{\mathrm{LP}}(\mathcal{I}_B)=\frac1m.
+\]
+For the ILP, the variables are in $\{0,1\}$. The coverage constraint
+requires at least one device with $x_{1j}=1$, which forces $y_1=1$.
+Selecting just one device is feasible and costs $1$, since all device
+costs are zero. Therefore,
+\[
+\mathrm{OPT}_{\mathrm{ILP}}(\mathcal{I}_B)=1.
+\]
+Substituting these values into our target inequality gives
+\[
+\mathrm{OPT}_{\mathrm{ILP}}(\mathcal{I}_B)
+>B\,\mathrm{OPT}_{\mathrm{LP}}(\mathcal{I}_B)
+\iff 1>\frac Bm
+\iff m>B.
+\]
+Thus, choosing any integer $m>B$ proves our claim.\hfill$\square$
+
+\end{document}

@@ -1,0 +1,265 @@
+\documentclass[12pt,a4paper]{article}
+\input{../../preamble}
+
+\title{Placing fire trucks}
+\author{Klevis Imeri}
+\date{}
+
+\begin{document}
+\maketitle
+
+First let us formalize what problem we are solving.
+
+The input to the problem:
+\[
+\mathcal{I} := \left\{
+\begin{aligned}
+N &:= \{\text{villages}\}, && |N|=n,\\
+P[i] &:= \text{population of village }i, && P[i]\geq0,\quad |P|=n,\\
+TT &:= \{(t,r)\mid t\text{ is an allowed team for truck }r\}, && |TT|=m,\\
+V[(t,r)] &:= \{v\in N\mid (t,r)\text{ covers }v\}, && (t,r)\in TT.
+\end{aligned}
+\right\}.
+\]
+
+The output is a set of pairs $\mathcal{S}=\{(t,r),\ldots\}$.
+\[
+\operatorname{feasible}(\mathcal{S}):=
+\mathcal{S}\subseteq TT\ \land\
+\forall (t,r),(t',r')\in\mathcal{S}:\;
+\bigl((t,r)\neq(t',r')\implies t\neq t'\land r\neq r'\bigr)
+.
+\]
+The cost
+\[
+f(\mathcal{S}) =
+\sum_{v\in\bigcup_{(t,r)\in\mathcal{S}} V[(t,r)]} P[v].
+\]
+
+Our goal is to design an algorithm $\mathcal{A}$, with
+$\mathcal{S}_{\mathcal{A}}=\mathcal{A}(\mathcal{I})$, such that:
+\begin{enumerate}
+\item $\mathcal{A}$ terminates.
+\item $\operatorname{feasible}(\mathcal{S}_{\mathcal{A}})$.
+\item $\operatorname{time}_{\mathcal{A}}(\mathcal{I})\leq\poly(|\mathcal{I}|)$.
+\item $\displaystyle f(\mathcal{S}_{\mathcal{A}})
+\geq \frac{1}{3}\max_{\substack{\mathcal{S}\subseteq TT\\\operatorname{feasible}(\mathcal{S})}} f(\mathcal{S})
+=\frac{f(\mathrm{OPT})}{3}$ ($\mathcal{A}$ is a $3$-approximation).
+\end{enumerate}
+
+Let us design the algorithm $\mathcal{A}$. The first intuition is that this problem
+is similar to set cover from the lecture, with at least these two differences:
+\begin{enumerate}
+\item In minimum set cover, we must cover every element. Selecting all sets would
+achieve this, but our goal of minimizing cost works against selecting everything.
+Here, we want to cover as much population as possible, but the feasibility
+constraint prevents us from selecting all pairs, each team and each truck can
+be used at most once. Thus, feasibility means covering every element in minimum
+set cover, whereas here it means selecting pairs without team or truck conflicts.
+\item In minimum set cover, we minimize the total cost of the selected sets.
+Here, we maximize the total population covered.
+So, instead of a minimization problem, we have a maximization problem.
+\end{enumerate}
+
+We hope that a similar greedy algorithm, with a choice similar to the one in
+minimum set cover, will suffice for this problem. Therefore, in each phase,
+we choose a pair covering the largest population among the villages not yet covered,
+$N'$. We call the population newly covered by a pair its gain
+(similar to the $ppi$ in the lecture):
+\[
+\operatorname{gain}((t,r)):=\sum_{v\in V[(t,r)]\cap N'}P[v].
+\]
+
+With this choice, we proceed to write the greedy algorithm:
+\begin{algorithm}[H]
+\caption{$\textit{placing\_fire\_trucks}(\mathcal{I})$}
+\begin{algorithmic}
+\If{$TT=\varnothing$ or $N=\varnothing$}
+    \State \Return $\varnothing$
+\EndIf
+\State $(t,r)\gets\text{any element of }\arg\max_{(t',r')\in TT}\operatorname{gain}((t',r'))$
+\State $TT'\gets\{(t',r')\in TT\mid t'\neq t\land r'\neq r\}$
+\State $N'\gets N\setminus V[(t,r)]$
+\State $\mathcal{I}'\gets\{N',P,TT',V\}$
+\State \Return $\{(t,r)\}\cup\Call{placing\_fire\_trucks}{\mathcal{I}'}$
+\end{algorithmic}
+\end{algorithm}
+
+Now we have to prove all four goals above for our algorithm.
+\begin{enumerate}
+\item Termination. If the algorithm does not return immediately, then
+$TT\neq\varnothing$, so a maximizing pair $(t,r)$ exists. This pair is removed:
+\[
+|TT'|<|TT|\leq m,\qquad |N'|\leq|N|\leq n.
+\]
+By the well-foundedness of the nonnegative integers, $|TT|$ cannot decrease
+strictly forever. Thus, after at most $m$ selections, the algorithm terminates.
+\item Feasibility.
+\begin{enumerate}
+\item The first selected pair belongs to $TT$, and each subsequent selected pair
+belongs to the remaining $TT'\subseteq TT$.
+Therefore, $\mathcal{S}_{\mathcal{A}}\subseteq TT$.
+\item Whenever we select $(t,r)$, we remove every pair $(t',r')$ with
+$t'=t$ or $r'=r$. Thus, no pair selected in a subsequent iteration can share
+a team or truck with $(t,r)$. Hence,
+\[
+\forall (t,r),(t',r')\in\mathcal{S}_{\mathcal{A}}:\quad
+(t,r)\neq(t',r')\implies t\neq t'\land r\neq r'.
+\]
+\end{enumerate}
+Both conditions hold throughout each iteration, so
+$\operatorname{feasible}(\mathcal{S}_{\mathcal{A}})$.
+\item Running time. Checking the stopping condition takes constant time. We compute the
+gain of at most $m$ pairs, each covering at most $n$ villages, so this takes
+$O(nm)$ time. Removing conflicting pairs takes $O(m)$ time, and removing covered villages takes $O(n)$ time.
+Preparing the recursive call and combining its result take at most $O(n+m)$
+additional time, using shared references for $P$ and $V$. Thus, with at most
+$m$ iterations (each iteration removes at least one pair),
+\[
+T_i=O(nm),\qquad
+T=\sum_{i=1}^{\text{number of iterations}}T_i
+\leq m\cdot O(nm)
+=O(nm^2)\subseteq O(n^2m^2)
+\subseteq\poly(|\mathcal{I}|).
+\]
+\item $3$-approximation. Now we have to prove the important part. A usual trick
+is to start with the following comparison in the subproblem of each iteration:
+
+In the minimum case:
+\[
+\text{minimum over all available choices}
+\leq
+\text{minimum over the available choices in OPT}.
+\]
+In the maximum case:
+\[
+\text{maximum over all available choices}
+\geq
+\text{maximum over the available choices in OPT}.
+\]
+
+In minimum set cover, we used
+$\min_{S_j\in\mathcal{S}'}ppi(S_j)\leq\min_{O_j\in\mathrm{OPT}'}ppi(O_j)$,
+where $\mathcal{S}'$ and $\mathrm{OPT}'$ denote the choices remaining in the
+current subproblem.
+Here, we maximize gain, so whenever $\mathrm{OPT}'\neq\varnothing$, our comparison is
+\begin{equation}
+\label{eq:greedy-gain-comparison}
+\max_{i\in TT'}\operatorname{gain}(i)\geq
+\max_{o\in\mathrm{OPT}'}\operatorname{gain}(o),
+\end{equation}
+where $TT'$ is the set of currently available pairs and $\mathrm{OPT}'$
+contains the pairs of a fixed optimal solution that are still available.
+
+To simplify notation, for the pair $t$ selected by greedy, write:
+\[
+\operatorname{gain}_t(t):=\max_{i\in TT'_t}\operatorname{gain}_t(i)
+\overset{\eqref{eq:greedy-gain-comparison}}{\geq}
+\max_{o\in\mathrm{OPT}'_t}\operatorname{gain}_t(o)
+\geq\operatorname{gain}_t(o),
+\qquad\forall o\in\mathrm{OPT}'_t.
+\]
+
+Now we connect the comparison above to what happens in each iteration.
+The chosen team and truck may belong to two different pairs in $\mathrm{OPT}'_t$.
+Since each team and truck appears at most once in an optimal solution, selecting
+$t$ removes at most two optimal pairs. Let $D_t$ be the set of these removed pairs.
+If $\mathrm{OPT}'_t=\varnothing$, then $D_t=\varnothing$ and the per-iteration
+bound below holds automatically.
+By equation~\eqref{eq:greedy-gain-comparison}, each has gain at most that of $t$, so:
+\[
+|D_t|\leq2,\qquad
+2\operatorname{gain}_t(t)\geq\sum_{o\in D_t}\operatorname{gain}_t(o).
+\]
+We use this form because summing the left-hand side over all iterations gives
+exactly twice the total population (cost) covered by the greedy solution:
+\[
+2f(\mathcal{S}_{\mathcal{A}})
+=2\sum_{t\in\mathcal{S}_{\mathcal{A}}}\operatorname{gain}_t(t)
+\geq\sum_{o\in\mathrm{OPT}}\operatorname{gain}_{\tau(o)}(o).
+\]
+Here, $t\in\mathcal{S}_{\mathcal{A}}$ is a selected pair, and
+$\operatorname{gain}_t$, $TT'_t$, and $\mathrm{OPT}'_t$ refer to the subproblem
+in which $t$ is selected.
+
+Now we have bounded $f(\mathcal{S}_{\mathcal{A}})$ by the expression on the right,
+but how do we relate the right-hand side to $f(\mathrm{OPT})$?
+
+Let us simplify the right-hand side. In each iteration, we remove the pairs
+sharing the chosen team or truck. Each optimal pair is removed at most once.
+If we finish with $TT=\varnothing$, every optimal pair has been removed, so:
+\[
+\bigcup_t D_t=\mathrm{OPT},\qquad D_t\cap D_s=\varnothing\quad(t\neq s).
+\]
+If we stop earlier because no uncovered villages remain, the remaining optimal
+pairs have zero gain. Let $\tau(o)$ be the iteration in which $o$ is removed,
+or the final state if $o$ remains. The gain $\operatorname{gain}_{\tau(o)}(o)$
+is measured immediately before that iteration's pair is selected and its
+covered villages are removed, or at termination if $o$ remains.
+Thus, we can write the right-hand side as:
+\[
+\sum_{t\in\mathcal{S}_{\mathcal{A}}}\sum_{o\in D_t}\operatorname{gain}_t(o)
+=\sum_{o\in\mathrm{OPT}}\operatorname{gain}_{\tau(o)}(o).
+\]
+
+To obtain $3f(\mathcal{S}_{\mathcal{A}})\geq f(\mathrm{OPT})$, it suffices to show:
+\[
+2f(\mathcal{S}_{\mathcal{A}})
+\geq\sum_{o\in\mathrm{OPT}}\operatorname{gain}_{\tau(o)}(o)
+\geq f(\mathrm{OPT})-f(\mathcal{S}_{\mathcal{A}}).
+\]
+The first inequality is already proved, so we only have to prove:
+\[
+\sum_{o\in\mathrm{OPT}}\operatorname{gain}_{\tau(o)}(o)
+\geq f(\mathrm{OPT})-f(\mathcal{S}_{\mathcal{A}}).
+\]
+It may be more intuitive to reason equivalently as:
+\[
+\sum_{o\in\mathrm{OPT}}\operatorname{gain}_{\tau(o)}(o)
++f(\mathcal{S}_{\mathcal{A}})\geq f(\mathrm{OPT}).
+\]
+Some may see immediately why this inequality holds, if a village covered by
+an optimal pair $o$ is not counted in any of the $\operatorname{gain}_{\tau(o)}(o)$ because
+greedy has already removed it from the uncovered villages, then it is already
+counted in $f(\mathcal{S}_{\mathcal{A}})$.
+
+To put it formally, let $N_{\mathcal{A}}$ be the villages covered by greedy and
+$N_{\tau(o)}$ the uncovered villages immediately before the selection that
+removes $o$ (or at termination if $o$ remains):
+\[
+N_{\mathcal{A}}:=\bigcup_{t\in\mathcal{S}_{\mathcal{A}}}V[t],\qquad
+N_{\mathrm{OPT}}:=\bigcup_{o\in\mathrm{OPT}}V[o],\qquad
+N_R:=\bigcup_{o\in\mathrm{OPT}}\bigl(V[o]\cap N_{\tau(o)}\bigr).
+\]
+$N_{\mathrm{OPT}}$ is the set of villages covered by the optimal solution.
+$N_R$ is the set of villages covered by an optimal pair that are still uncovered
+by greedy when that pair is removed, namely the villages counted in the gain terms.
+\[
+N_{\mathrm{OPT}}\subseteq N_{\mathcal{A}}\cup N_R.
+\]
+\[
+\begin{aligned}
+\sum_{o\in\mathrm{OPT}}\operatorname{gain}_{\tau(o)}(o)
++f(\mathcal{S}_{\mathcal{A}})
+&\geq\sum_{v\in N_R}P[v]+\sum_{v\in N_{\mathcal{A}}}P[v]\\
+&\geq\sum_{v\in N_{\mathcal{A}}\cup N_R}P[v]\\
+&\geq\sum_{v\in N_{\mathrm{OPT}}}P[v]
+=f(\mathrm{OPT}).
+\end{aligned}
+\]
+Thus, we have proved:
+\[
+2f(\mathcal{S}_{\mathcal{A}})
+\geq\sum_{o\in\mathrm{OPT}}\operatorname{gain}_{\tau(o)}(o)
+\geq f(\mathrm{OPT})-f(\mathcal{S}_{\mathcal{A}}).
+\]
+Rearranging gives:
+\[
+3f(\mathcal{S}_{\mathcal{A}})\geq f(\mathrm{OPT})
+\quad\Longrightarrow\quad
+f(\mathcal{S}_{\mathcal{A}})\geq\frac{f(\mathrm{OPT})}{3}.
+\]
+So our algorithm $\mathcal{A}$ is a $3$-approximation.\hfill$\square$
+\end{enumerate}
+
+\end{document}
