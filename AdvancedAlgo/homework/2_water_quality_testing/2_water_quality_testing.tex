@@ -12,7 +12,7 @@ The input to the problem:
 \[
 \mathcal{I}:=\left\{
 \begin{aligned}
-N &:=\{\text{laboratories}\}, && |N|=n,\\
+N &:=\{\text{laboratroies}\}, && |N|=n,\\
 T &:=\{\text{contaminants}\}, && |T|=t,\\
 M[i][j] &:=\{k\in T\mid\text{device }j\text{ from lab }i\text{ tests }k\},
 && i\in N,\ j\in[m],\\
@@ -58,7 +58,7 @@ For the natural LP given in the exercise, show that:
 \]
 
 Fix an arbitrary $B>0$. We construct an instance $\mathcal{I}_B$
-depending on $B$, with one laboratory and one contaminant, such that
+depending on $B$, with one laboratory and one contamimant, such that
 \[
 \mathrm{OPT}_{\mathrm{ILP}}(\mathcal{I}_B)
 >B\,\mathrm{OPT}_{\mathrm{LP}}(\mathcal{I}_B).
@@ -81,7 +81,7 @@ To minimize $y_1$, we choose
 \[
 x_{1j}=y_1=\frac1m\qquad\forall j\in[m].
 \]
-This is feasible. To see that a smaller cost is impossible, suppose
+This is feasable. To see that a smaller cost is impossible, suppose
 $y_1<1/m$. Since $x_{1j}\leq y_1$ for every device,
 \[
 \sum_{j=1}^m x_{1j}\leq my_1<1,
@@ -105,5 +105,354 @@ Substituting these values into our target inequality gives
 \iff m>B.
 \]
 Thus, choosing any integer $m>B$ proves our claim.\hfill$\square$
+
+\paragraph{Goal 2.}
+Given the strengthened LP from the exercise, we have to show that:
+\[
+\begin{gathered}
+\forall\mathcal{S}\text{ feasible for the ILP},\quad
+\exists x_{ij},\ y_i,\ z_{ik}\quad(i\in N,\ j\in[m],\ k\in T):\\
+\text{all constraints of the strengthened LP hold, and}\\
+\sum_{i=1}^n d_i y_i
++\sum_{i=1}^n\sum_{j=1}^m c_{ij}x_{ij}=f(\mathcal{S}).
+\end{gathered}
+\]
+The old constraints bound each device separately by $x_{ij}\leq y_i$.
+The new constraint bounds the laboratory's total contribution to contaminant $k$ by
+$z_{ik}\leq y_i$.
+
+Let us choose a generic feasible selection $\mathcal{S}$. For
+$i\in N$, $j\in[m]$, and $k\in T$, set
+\[
+\begin{aligned}
+x_{ij}&:=\begin{cases}
+1 &(i,j)\in\mathcal{S},\\
+0 &\text{otherwise},
+\end{cases}\\[6pt]
+y_i&:=\begin{cases}
+1 &\exists j\in[m]:\ (i,j)\in\mathcal{S},\\
+0 &\text{otherwise},
+\end{cases}\\[6pt]
+z_{ik}&:=\begin{cases}
+1 &\exists j\in[m]:\ (i,j)\in\mathcal{S}\ \land\ k\in M[i][j],\\
+0 &\text{otherwise}.
+\end{cases}
+\end{aligned}
+\]
+These variables satisfy the new constaints:
+\begin{enumerate}
+\item $z_{ik}\leq y_i$ holds because if $z_{ik}=1$, a selected device from laboratory
+$i$ tests $k$, so $y_i=1$.
+\item $z_{ik}\leq\sum_{j:\,k\in M[i][j]}x_{ij}$ holds because if $z_{ik}=1$, at
+least one selected device appears in the sum, so the sum is at least $1$.
+\item $\sum_i z_{ik}\geq1$ holds since $\mathcal{S}$ is feasible, so every
+contaminant $k$ is tested by a selected device from some laboratory.
+\end{enumerate}
+All variables are in $\{0,1\}$, selecting a device implies using its
+laboratory, and every contaminant is covered. Thus, the original LP
+constraints also hold.
+
+Finally, the objective charges exactly the selected devices and one
+delivery fee per used laboratory, giving
+\[
+\sum_{i=1}^n d_i y_i+\sum_{i=1}^n\sum_{j=1}^m c_{ij}x_{ij}
+=\sum_{\substack{i\in N\\\exists j:\,(i,j)\in\mathcal{S}}}d[i]
++\sum_{(i,j)\in\mathcal{S}}c[i][j]
+=f(\mathcal{S}).
+\]
+Thus, for any feasible $\mathcal{S}$, we can choose the variables as above
+so that all constraints of the strengthened LP hold and the cost equals
+$f(\mathcal{S})$.\hfill$\square$
+
+\paragraph{Goal 3.}
+Let $\mathcal{A}$ be our randomized procedure and let
+$\mathcal{S}_{\mathcal{A}}$ be the set of devices it selects.
+The exercise asks us to prove that:
+\begin{enumerate}
+\item Expected cost.
+\[
+\mathbb{E}\!\left[f(\mathcal{S}_{\mathcal{A}})\right]
+\leq\mathrm{OPT}_{\mathrm{LP}}.
+\]
+\item Coverage probability.
+\[
+\exists p>0\text{ constant},\quad
+\forall k\in T:\quad
+\Pr\!\left[k\in\bigcup_{(i,j)\in\mathcal{S}_{\mathcal{A}}}M[i][j]\right]
+\geq p.
+\]
+\end{enumerate}
+
+Here we use the usual trick from the lecture and use the fractional LP
+values as probabilities. Let $x_{ij},y_i,z_{ik}$ be an optimal solution
+of the strengthened LP. Select each laboratory $i$ independently with
+probability $y_i$. If it is selected, select each of its devices $j$
+independently with probability $x_{ij}/y_i$. If $y_i=0$, select no devices
+from that laboratory.
+
+We divide by $y_i$ to compensate for selecting the laboratory first.
+For $y_i>0$, the overall probability of selecting device $(i,j)$ is
+\[
+\begin{aligned}
+\Pr[(i,j)\in\mathcal{S}_{\mathcal{A}}]
+&\overset{\text{multiplication rule}}{=}
+\Pr[\text{select laboratory }i]\\
+&\quad\cdot\Pr[\text{select device }j\mid\text{laboratory }i\text{ selected}]\\
+&=y_i\cdot\frac{x_{ij}}{y_i}=x_{ij}.
+\end{aligned}
+\]
+If $y_i=0$, then $x_{ij}=0$ by $x_{ij}\leq y_i$, so this equality still
+holds. All probabilities are valid because $0\leq x_{ij}\leq y_i\leq1$.
+
+Now we calculate the expected cost. Let $Y_i$ indicate that laboratory
+$i$ is selected, and let $X_{ij}$ indicate that device $(i,j)$ is selected.
+Then $\mathbb{E}[Y_i]=y_i$ and $\mathbb{E}[X_{ij}]=x_{ij}$.
+If $Y_i=1$ but no device from laboratory $i$ ends up selected, its actual
+delivery fee is $0$. Therefore,
+\[
+\text{actual delivery cost from laboratory }i\leq d_iY_i.
+\]
+By linearity of expectation,
+\[
+\begin{aligned}
+\mathbb{E}[f(\mathcal{S}_{\mathcal{A}})]
+&\leq\mathbb{E}\!\left[
+\sum_{i=1}^n d_iY_i+\sum_{i=1}^n\sum_{j=1}^m c_{ij}X_{ij}
+\right]\\
+&=\sum_{i=1}^n d_i\mathbb{E}[Y_i]
++\sum_{i=1}^n\sum_{j=1}^m c_{ij}\mathbb{E}[X_{ij}]\\
+&=\sum_{i=1}^n d_i y_i+\sum_{i=1}^n\sum_{j=1}^m c_{ij}x_{ij}
+=\mathrm{OPT}_{\mathrm{LP}}.
+\end{aligned}
+\]
+
+Now we analyze the coverage probability. Using the complement event and independence between
+laboratories,
+\[
+\begin{aligned}
+\Pr\!\left[k\in\bigcup_{(i,j)\in\mathcal{S}_{\mathcal{A}}}M[i][j]\right]
+&=1-\Pr[k\text{ is not tested}]\\
+&=1-\prod_{i\in N}\Pr[\text{laboratory }i\text{ does not test }k]\\
+&=1-\prod_{i\in N}\bigl(1-\Pr[\text{laboratory }i\text{ tests }k]\bigr).
+\end{aligned}
+\]
+For each laboratory with $y_i>0$, the multiplication rule gives
+\[
+\begin{aligned}
+\Pr[\text{laboratory }i\text{ tests }k]
+&=\Pr[\text{select laboratory }i]\\
+&\quad\cdot\Pr[\text{laboratory }i\text{ tests }k\mid\text{laboratory }i\text{ selected}].
+\end{aligned}
+\]
+\[
+\begin{aligned}
+&\Pr[\text{laboratory }i\text{ tests }k\mid\text{laboratory }i\text{ selected}]\\
+&\quad=1-\Pr[\text{no device testing }k\text{ selected}\mid\text{laboratory }i\text{ selected}]\\
+&\quad=1-\prod_{\substack{j\in[m]\\k\in M[i][j]}}
+\Pr[\text{device }(i,j)\text{ not selected}\mid\text{laboratory }i\text{ selected}]\\
+&\quad=1-\prod_{\substack{j\in[m]\\k\in M[i][j]}}
+\left(1-\Pr[\text{select device }(i,j)\mid\text{laboratory }i\text{ selected}]\right).
+\end{aligned}
+\]
+Substituting the probabilities gives
+\[
+\begin{aligned}
+\Pr\!\left[k\in\bigcup_{(i,j)\in\mathcal{S}_{\mathcal{A}}}M[i][j]\right]
+&=1-\prod_{\substack{i\in N\\y_i>0}}
+\left[1-y_i\left(1-\prod_{\substack{j\in[m]\\k\in M[i][j]}}
+\left(1-\frac{x_{ij}}{y_i}\right)\right)\right]\\
+&\overset{(1)}{\geq}1-\prod_{\substack{i\in N\\y_i>0}}
+\left[1-y_i\left(1-\exp\!\left(-\sum_{\substack{j\in[m]\\k\in M[i][j]}}
+\frac{x_{ij}}{y_i}\right)\right)\right]\\
+&\overset{(2)}{\geq}1-\prod_{\substack{i\in N\\y_i>0}}
+\left[1-y_i\left(1-e^{-z_{ik}/y_i}\right)\right]\\
+&\overset{(3)}{\geq}1-\prod_{\substack{i\in N\\y_i>0}}
+\left[1-(1-e^{-1})z_{ik}\right]\\
+&\overset{(4)}{\geq}1-\exp\!\left(-(1-e^{-1})
+\sum_{\substack{i\in N\\y_i>0}}z_{ik}\right)\\
+&\overset{(5)}{\geq}1-e^{-(1-e^{-1})}.
+\end{aligned}
+\]
+Laboratories with $y_i=0$ are omitted because they are never selected.
+The numbered steps use the following facts.
+\begin{enumerate}
+\item As in many exercises, the factors $1-u$ suggest using the familiar
+bound $1-u\leq e^{-u}$ for $0\leq u\leq1$. Since
+$0\leq x_{ij}/y_i\leq1$, we apply it to each factor in the inner
+product. Multiplying the exponential factors gives
+the exponential of their sum.
+\item The LP constraint gives
+$z_{ik}\leq\sum_{j:\,k\in M[i][j]}x_{ij}$, so
+$e^{-\sum_j x_{ij}/y_i}\leq e^{-z_{ik}/y_i}$, where the sum is over
+devices testing $k$.
+\item By $0\leq z_{ik}\leq y_i$, the ratio $u=z_{ik}/y_i$ lies in
+$[0,1]$. The function $h(u)=1-e^{-u}$ is concave on $[0,1]$ because
+$h''(u)=-e^{-u}<0$ for every $u\in[0,1]$.
+As we have done many times in the exercises, we use Jensen's inequality
+for concave functions,
+\[
+1-e^{-u}=h((1-u)\cdot0+u\cdot1)
+\geq(1-u)h(0)+uh(1)=(1-e^{-1})u.
+\]
+Multiplying by $y_i$ gives
+$y_i(1-e^{-z_{ik}/y_i})\geq(1-e^{-1})z_{ik}$.
+\item Apply $1-u\leq e^{-u}$ again, now with
+$u=(1-e^{-1})z_{ik}$, to the outer product. Since
+$0\leq z_{ik}\leq y_i\leq1$ and $0<1-e^{-1}<1$,
+\[
+0\leq(1-e^{-1})z_{ik}\leq1-e^{-1}<1,
+\]
+so $u\in[0,1]$.
+\item If $y_i=0$, then $z_{ik}=0$. Hence the remaining sum equals
+$\sum_i z_{ik}\geq1$ by the coverage constraint of the strengthened LP.
+\end{enumerate}
+Thus, we can take the constant
+\[
+p=1-e^{-(1-e^{-1})}\approx0.4685>0,
+\]
+which is independent of the input.\hfill$\square$
+
+\paragraph{Goal 4.}
+Design a polynomial-time randomized algorithm $\mathcal{A}$ such that
+\[
+\Pr\!\left[
+\operatorname{feasible}(\mathcal{S}_{\mathcal{A}})
+\ \land\
+f(\mathcal{S}_{\mathcal{A}})
+\leq O(\log n)\,\mathrm{OPT}_{\mathrm{ILP}}
+\right]\geq1-\delta
+\qquad\text{for fixed }\delta\in(0,1).
+\]
+The procedure from Goal 3 gives a selected set of devices, but that set
+need not be feasible, since it may not cover all contaminants. The idea
+is therefore to run the procedure several times and combine the selected
+devices. Call the procedure from Goal 3 $\mathcal{A}_3$ and its output
+$\mathcal{S}_{\mathcal{A}_3}$. Run it independently $r$ times and let
+\[
+\mathcal{S}:=\bigcup_{\ell=1}^r\mathcal{S}_{\mathcal{A}_3}^{(\ell)}.
+\]
+We first separate the two possible failures using the complement rule
+and the union bound,
+\begin{equation}
+\tag{*}\label{eq:water-quality-joint-failure}
+\begin{aligned}
+&\Pr\!\left[\operatorname{feasible}(\mathcal{S})
+\ \land\ f(\mathcal{S})\leq O(\log n)\,\mathrm{OPT}_{\mathrm{ILP}}\right]\\
+&\quad=1-\Pr\!\left[\neg\operatorname{feasible}(\mathcal{S})
+\ \lor\ f(\mathcal{S})>O(\log n)\,\mathrm{OPT}_{\mathrm{ILP}}\right]\\
+&\quad\geq1-\Pr[\neg\operatorname{feasible}(\mathcal{S})]
+-\Pr\!\left[f(\mathcal{S})>O(\log n)\,\mathrm{OPT}_{\mathrm{ILP}}\right].
+\end{aligned}
+\end{equation}
+Let us first find $\Pr[\neg\operatorname{feasible}(\mathcal{S})]$.
+\[
+\begin{aligned}
+\Pr[\neg\operatorname{feasible}(\mathcal{S})]
+&=\Pr[\text{some contaminant is missed in all }r\text{ rounds}]\\
+&=\Pr\!\left[\bigcup_{k\in T}
+\{k\text{ is missed in all }r\text{ rounds}\}\right]\\
+&\leq\sum_{k\in T}\Pr[k\text{ is missed in all }r\text{ rounds}].
+\end{aligned}
+\]
+For each contaminant $k\in T$, independence of the runs gives
+\[
+\begin{aligned}
+\Pr[k\text{ is missed in all }r\text{ rounds}]
+&=\prod_{\ell=1}^r\Pr[k\text{ is missed in round }\ell]\\
+&=\prod_{\ell=1}^r\left(1-\Pr[k\text{ is tested in round }\ell]\right)\\
+&\leq(1-p)^r,
+\end{aligned}
+\]
+where $p$ is the constant from Goal 3.
+Therefore,
+\[
+\Pr[\neg\operatorname{feasible}(\mathcal{S})]
+\leq\sum_{k\in T}(1-p)^r=t(1-p)^r.
+\]
+What remains is to bound
+\[
+\Pr\!\left[f(\mathcal{S})>O(\log n)\,\mathrm{OPT}_{\mathrm{ILP}}\right].
+\]
+We have not yet determined the factor represented by $O(\log n)$,
+so write $a=?$ for this positive factor. This probability has the form
+needed for Markov's inequality. For $\mathrm{OPT}_{\mathrm{ILP}}>0$,
+\[
+\Pr\!\left[f(\mathcal{S})>a\,\mathrm{OPT}_{\mathrm{ILP}}\right]
+\overset{\text{Markov}}{\leq}
+\frac{\mathbb{E}[f(\mathcal{S})]}{a\,\mathrm{OPT}_{\mathrm{ILP}}}.
+\]
+To continue, we need to bound $\mathbb{E}[f(\mathcal{S})]$.
+\[
+\begin{aligned}
+\mathbb{E}[f(\mathcal{S})]
+&=\mathbb{E}\!\left[f\!\left(\bigcup_{\ell=1}^r
+\mathcal{S}_{\mathcal{A}_3}^{(\ell)}\right)\right]\\
+&\leq\mathbb{E}\!\left[\sum_{\ell=1}^r
+f(\mathcal{S}_{\mathcal{A}_3}^{(\ell)})\right]\\
+&\overset{\text{linearity}}{=}\sum_{\ell=1}^r
+\mathbb{E}[f(\mathcal{S}_{\mathcal{A}_3}^{(\ell)})]
+\overset{\substack{\text{expected cost}\\\text{in Goal 3}}}{\leq}
+r\,\mathrm{OPT}_{\mathrm{LP}}
+\leq r\,\mathrm{OPT}_{\mathrm{ILP}}.
+\end{aligned}
+\]
+Substituting this expected-cost bound gives
+\[
+\Pr\!\left[f(\mathcal{S})>a\,\mathrm{OPT}_{\mathrm{ILP}}\right]
+\leq\frac{r\,\mathrm{OPT}_{\mathrm{ILP}}}{a\,\mathrm{OPT}_{\mathrm{ILP}}}
+=\frac{r}{a}.
+\]
+If $\mathrm{OPT}_{\mathrm{ILP}}=0$, then
+\[
+0\leq\mathbb{E}[f(\mathcal{S})]
+\leq r\,\mathrm{OPT}_{\mathrm{ILP}}=0.
+\]
+Since $f(\mathcal{S})\geq0$,
+\[
+\mathbb{E}[f(\mathcal{S})]=0
+\implies\Pr[f(\mathcal{S})=0]=1.
+\]
+Therefore,
+\[
+\Pr[f(\mathcal{S})>a\,\mathrm{OPT}_{\mathrm{ILP}}]
+=\Pr[f(\mathcal{S})>0]=0\leq\frac ra.
+\]
+We will choose $a$ and $r$ later, and must ensure
+$a=O(\log n)$.
+Now we substitute both probability bounds into
+Equation~\eqref{eq:water-quality-joint-failure}, writing the unknown cost
+factor as $a$, to obtain
+\[
+\Pr\!\left[\operatorname{feasible}(\mathcal{S})
+\ \land\ f(\mathcal{S})\leq a\,\mathrm{OPT}_{\mathrm{ILP}}\right]
+\geq1-t(1-p)^r-\frac ra.
+\]
+To make this at least $1-\delta$, we need
+\[
+t(1-p)^r+\frac ra\leq\delta.
+\]
+We give each failure probability half of the allowed error by requiring
+\[
+t(1-p)^r\leq\frac\delta2,
+\qquad\frac ra\leq\frac\delta2.
+\]
+Together, these imply $t(1-p)^r+r/a\leq\delta$. Choose
+\[
+r=\left\lceil\frac{\ln(2t/\delta)}{-\ln(1-p)}\right\rceil,
+\qquad a=\frac{2r}{\delta}.
+\]
+Substituting these choices gives
+\[
+\Pr\!\left[\operatorname{feasible}(\mathcal{S})
+\ \land\ f(\mathcal{S})\leq\frac{2r}{\delta}\,\mathrm{OPT}_{\mathrm{ILP}}\right]
+\geq1-\frac\delta2-\frac\delta2=1-\delta.
+\]
+For fixed $\delta$, this gives an $O(\log t)$ approximmation. The exercise
+asks for an $O(\log n)$ approximmation, but no relation between $t$ and $n$
+is given here. I could not find an obvious way to change this algorithm
+so that the bound depends on $n$ instead of $t$.
+For fixed $\delta$, the number of runs is $r=O(\log t)$. Since each run
+of $\mathcal{A}_3$ takes polynomial time, the whole procedure also takes
+polynomial time.
 
 \end{document}
