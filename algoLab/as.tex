@@ -1,0 +1,167 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{listings}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.4em}
+\lstset{
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2
+}
+\lstdefinestyle{code}{
+  language=C++,
+  basicstyle=\ttfamily\fontsize{8}{9}\selectfont,
+  aboveskip=0pt,
+  belowskip=0pt
+}
+
+\begin{document}
+
+\begin{lstlisting}[style=code]
+#include <bits/stdc++.h>
+#include <iostream>
+using namespace std;
+
+#define dg 0
+
+#if dg
+#define d(X) cout<<"["#X"]: ";
+#define dd(X) d(X);cout<<X<<endl;
+#define dv(X) d(X);for(auto& x:X)cout<<x<<' ';cout<<endl;
+#define dvv(X) d(X);cout<<endl;for(auto& xi:X){for(auto& xij:xi){cout<<xij<<' ';}cout<<endl;}
+#else
+#define d(X)
+#define dd(X)
+#define dv(X)
+#define dvv(X)
+#endif
+
+#define MAX INT_MAX-10
+#define MIN INT_MIN+10
+
+struct N{
+  int min,max;
+};
+ostream& operator<<(ostream& out, const N& x){
+  return out<<"{"<<x.min<<','<<x.max<<"}";
+}
+
+void solve() {
+  int n,m; cin>>n>>m; dd(n); dd(m);
+  int r,b; cin>>r>>b; r--; b--; dd(r); dd(b);
+  vector<vector<int>> G(n);
+  for(int i=0; i<m; i++){
+    int a,b; cin>>a>>b; a--; b--;
+    G[a].push_back(b);
+  } dvv(G);
+\end{lstlisting}
+\noindent\begin{minipage}[t]{0.48\linewidth}
+\begin{lstlisting}[style=code]
+  vector<N> DP(n,{MAX,MIN});
+  for(int i=n-1; i>=0; i--){
+    if(i==n-1) {
+      DP[i]={0,0};
+      continue;
+    }
+    for(auto& e:G[i]){
+      DP[i] = {
+        min(DP[e].max+1, DP[i].min),
+        max(DP[e].min+1, DP[i].max)
+      };
+    }
+  }
+  dv(DP);
+  
+  int rr = DP[r].min;
+  int bb = DP[b].min;
+  dd(rr); dd(bb);
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.50\linewidth}
+\begin{lstlisting}[style=code]
+// Alternative: memoized recursion
+vector<N> MEMO(n,{-1,-1}); MEMO[n-1]={0,0};
+auto gmin = [&](auto& gmax, auto& gmin, int n) -> int {
+  if(MEMO[n].min!=-1) return MEMO[n].min;
+  int v = MAX;
+  for(auto& e:G[n]){
+    v=min(v,gmax(gmax,gmin,e)+1);
+  };
+  return MEMO[n].min=v;
+};
+auto gmax = [&](auto& gmax, auto& gmin, int n) -> int {
+  if(MEMO[n].max!=-1) return MEMO[n].max;
+  int v = MIN;
+  for(auto& e:G[n]){
+    v=max(v,gmin(gmax,gmin,e)+1);
+  };
+  return MEMO[n].max=v;
+};
+
+int rr = gmin(gmax,gmin,r);
+int bb = gmin(gmax,gmin,b);
+\end{lstlisting}
+\end{minipage}
+\par\vspace{9pt}
+\begin{lstlisting}[style=code]
+  if(rr<bb){
+    cout<<0<<endl;
+  }else if(rr==bb) {
+    if(rr%2==1) {
+      cout<<0<<endl;
+    } else {
+      cout<<1<<endl;
+    }
+  } else {
+    cout<<1<<endl;
+  }
+  
+}
+
+int main() {
+  ios_base::sync_with_stdio(false);
+  int t; cin>>t; while(t--) solve();
+}
+\end{lstlisting}
+
+\clearpage
+
+\begin{lstlisting}
+[n]: 3
+[m]: 2
+[r]: 0
+[b]: 0
+[G]: 
+0: 1 
+1: 2 
+2:
+[DP]: {2,2} {1,1} {0,0} 
+[rr]: 2
+[bb]: 2
+Output: 1
+
+
+[n]: 7
+[m]: 9
+[r]: 0
+[b]: 1
+[G]: 
+0: 1 4 
+1: 2 
+2: 3 4 
+3: 4 5 
+4: 5 
+5:
+[DP]: {3,5} {4,4} {3,3} {2,3} {2,2} {1,1} {0,0} 
+[rr]: 3
+[bb]: 4
+Output: 0
+\end{lstlisting}
+
+\end{document}
