@@ -11,4 +11,4 @@
 
 ## Compilation
 
-Run `./r.sh <file.tex>` to compile a document, e.g. `./r.sh notes.tex` or `./r.sh exercises.tex`. Defaults to `notes.tex` when no argument is given. The shared preamble lives in `preamble.tex`.
+The lecture notes and their build files live in `notes/`. Run `./notes/r.sh` to compile `notes/notes.tex`. The shared preamble remains in `preamble.tex` at the project root and is also used by the homework.

@@ -1,0 +1,10 @@
+Makefile
+Makefile.conf
+.Makefile.d
+*.vo
+*.vos
+*.vok
+*.glob
+.*.aux
+.lia.cache
+.nia.cache

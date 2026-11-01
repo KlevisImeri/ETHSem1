@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\input{preamble}
+\input{../preamble}
 
 \title{Advanced Algorithms\\\large Klevis Imeri Lecture Notes}
 \author{}
@@ -1524,6 +1524,394 @@ and $p_{\max}=\max_{i\in S}p_i$ takes the maximum over all items.
 \item In the proof of Theorem~2.4, should ``$p(S)$ and $'(S)$'' read
 ``$p(S)$ and $p'(S)$''? The rounded-profit notation appears to be missing $p$.
 \end{enumerate}
+
+\clearpage
+\setcounter{section}{5}
+\section{Advanced Hashing}
+\setcounter{subsection}{2}
+\subsection{Hashing with chaining}
+
+\begin{theorem}[Worst-case running time of chaining]
+\label{thm:chaining-worst-case}
+\[
+\begin{gathered}
+S\subseteq[U],\qquad |S|\leq n,\qquad m=n,\qquad c>2,\\
+k=O\!\left(\frac{\log n}{\log\log n}\right),\qquad
+h:[U]\to[n],\qquad h\sim\mathcal U(\mathcal H),\\
+\mathcal H\text{ uniform, }k\text{-wise independent}.
+\end{gathered}
+\]
+Choose $k$ with a sufficiently large constant factor depending on $c$.
+For sufficiently large $n$,
+\[
+\Pr_h\!\left[\max_{i\in[n]}|H[i]|<k\right]\geq1-n^{2-c}.
+\]
+Consequently, with probability at least $1-n^{2-c}$,
+\[
+T_{\max}=O\!\left(1+\max_{i\in[n]}|H[i]|\right)
+=O\!\left(\frac{\log n}{\log\log n}\right).
+\]
+\[
+\begin{aligned}
+H[i]&:\text{ list of stored keys hashing to bucket }i,\\
+T_{\max}&:\text{ maximum operation time for this table, with }O(1)\text{-time hashing},\\
+\mathcal H&:\text{ hash family},\qquad
+\mathcal U(\mathcal H):\text{ uniform distribution on }\mathcal H,\\
+\log&:=\ln,\qquad c:\text{ fixed constant independent of }n.
+\end{aligned}
+\]
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}
+\item Fix a bucket $i$:
+\[
+\begin{aligned}
+\Pr_h[|H[i]|=k]
+&\leq\Pr_h[|H[i]|\geq k]\\
+&=\Pr_h[\exists X\subseteq S:\ |X|=k,\ \forall x\in X:\ h(x)=i]\\
+&\leq\sum_{\substack{X\subseteq S\\|X|=k}}
+ \Pr_h[\forall x\in X:\ h(x)=i]
+ \qquad\text{(union bound)}\\
+&\overset{k\text{-wise independence}}{=}\sum_{\substack{X\subseteq S\\|X|=k}}
+ \prod_{x\in X}\Pr_h[h(x)=i]
+ \\
+&\overset{\text{uniformity}}{=}\sum_{\substack{X\subseteq S\\|X|=k}}\frac1{n^k}\\
+&=\binom{|S|}{k}\frac1{n^k}
+\leq\binom nk\frac1{n^k}.
+\end{aligned}
+\]
+
+\item Bound the binomial coefficient. For $1\leq k\leq n$,
+\[
+\binom nk
+=\frac{n(n-1)\cdots(n-k+1)}{k!}
+\leq\frac{n^k}{k!}.
+\]
+Since $\log$ is increasing, its right-endpoint rectangles lie above the curve:
+\[
+\begin{aligned}
+\log(k!)
+&=\sum_{j=2}^{k}\log j
+\geq\sum_{j=2}^{k}\int_{j-1}^{j}\log x\,dx\\
+&=\int_1^k\log x\,dx
+=[x\log x-x]_1^k\\
+&=k\log k-k+1\geq k\log k-k.
+\end{aligned}
+\]
+\[
+k!\geq e^{k\log k-k}=\left(\frac{k}{e}\right)^k
+\quad\Longrightarrow\quad
+\binom nk\leq\left(\frac{ne}{k}\right)^k.
+\]
+Therefore,
+\[
+\boxed{\Pr_h[|H[i]|\geq k]
+\leq\binom nk\frac1{n^k}
+\leq\left(\frac ek\right)^k.}
+\]
+
+\item Choose $k$ so that the probability is at most $n^{-c}$:
+\[
+\begin{aligned}
+\left(\frac ek\right)^k\leq n^{-c}
+&\iff k(1-\log k)\leq-c\log n\\
+&\iff k(\log k-1)\geq c\log n.
+\end{aligned}
+\]
+The scale follows from $k\log k\approx c\log n$:
+\[
+k=O\!\left(\frac{\log n}{\log\log n}\right),\qquad
+\log k=\Theta(\log\log n).
+\]
+Hence,
+\[
+\forall i\in[n]:\qquad
+\Pr_h[|H[i]|\geq k]\leq n^{-c}.
+\]
+
+\item Apply the lecture's union bound over buckets and possible list sizes.
+For every integer $t\geq k$,
+\[
+\Pr_h[|H[i]|=t]\leq\Pr_h[|H[i]|\geq k]\leq n^{-c}.
+\]
+There are $n$ buckets and at most $n$ possible sizes $t\in\{k,\ldots,n\}$:
+\[
+\begin{aligned}
+\Pr_h[\exists i\in[n]:\ |H[i]|\geq k]
+&\leq\sum_{i\in[n]}\sum_{t=k}^{n}\Pr_h[|H[i]|=t]\\
+&\leq n\cdot n\cdot n^{-c}
+=n^{2-c}.
+\end{aligned}
+\]
+Taking the complementary event reverses the direction of the bound:
+\[
+\boxed{\Pr_h[\forall i\in[n]:\ |H[i]|<k]\geq1-n^{2-c}.}
+\]
+
+\item On this event, even the longest list has fewer than $k$ items:
+\[
+T_{\max}
+=O\!\left(1+\max_{i\in[n]}|H[i]|\right)
+=O(k)
+=O\!\left(\frac{\log n}{\log\log n}\right).
+\]
+\[
+\begin{aligned}
+\text{w.p.}&:\text{ with probability},\\
+\text{w.h.p.}&:\text{ with high probability; here, at least }1-n^{-(c-2)}.
+\end{aligned}
+\]
+\end{enumerate}
+\end{proof}
+
+\clearpage
+\setcounter{subsection}{3}
+\subsection{Linear probing}
+
+\setcounter{theorem}{5}
+\begin{theorem}[Expected running time of linear probing]
+\label{thm:linear-probing-expected-time}
+\[
+S\subseteq[U],\qquad |S|\leq n,\qquad m\geq\frac32n.
+\]
+\[
+h:[U]\to[m],\qquad h\sim\mathcal U(\mathcal H),\qquad
+\mathcal H\text{ uniform, 5-wise independent}.
+\]
+\[
+\forall\mathsf{op}\in\{\mathsf{Member?},\mathsf{Insert},\mathsf{Delete}\}:\qquad
+\mathbb E_h[T_{\mathsf{op}}(x)]=O(1).
+\]
+\[
+\begin{aligned}
+S&:\text{ stored keys},\qquad n:\text{ upper bound on }|S|,\\
+\mathcal H&:\text{ hash family},\qquad
+\mathcal U(\mathcal H):\text{ uniform distribution on }\mathcal H,\\
+H&:\text{ table with }m\text{ slots},\qquad x:\text{ fixed key of the operation},\\
+T_{\mathsf{op}}(x)&:\text{ running time, assuming }O(1)\text{-time hash evaluation}.
+\end{aligned}
+\]
+\end{theorem}
+
+\subsubsection*{Initial reduction: grouping run lengths}
+Fix $a\in[m]$ and condition on $h(x)=a$.
+\[
+T_{\mathsf{op}}(x)=O\bigl(|R(x)|+1\bigr),\qquad
+L:=|R(x)|,\qquad 0\leq L\leq m.
+\]
+\[
+\begin{aligned}
+R(x)&:\text{ maximal contiguous occupied run containing }h(x),\\
+&\phantom{:}\text{ with wrap-around; }R(x)=\varnothing\text{ if }H[h(x)]\text{ is empty},\\
+L&:\text{ random run length; randomness is over the choice of }h.
+\end{aligned}
+\]
+\[
+\mathbb E_h[L\mid h(x)=a]=\sum_{t=0}^{m}t\,\Pr_h[L=t\mid h(x)=a],\qquad
+\Pr_h[L=t\mid h(x)=a]=0\quad(t>m).
+\]
+
+\begin{enumerate}
+\item Separate lengths $0,1,2,3$ and group the remaining lengths:
+\[
+\{0,1,2,3\},\quad[4,8),\quad[8,16),\quad[16,32),\quad\ldots
+\]
+\[
+\mathbb E_h[L\mid h(x)=a]
+=\sum_{t=0}^{3}t\,\Pr_h[L=t\mid h(x)=a]
++\sum_{\ell\geq0}
+ \sum_{t=4\cdot2^\ell}^{8\cdot2^\ell-1}t\,\Pr_h[L=t\mid h(x)=a].
+\]
+
+\item Bound the contribution of the small lengths using $t\leq3$:
+\[
+\sum_{t=0}^{3}t\,\Pr_h[L=t\mid h(x)=a]
+\leq3\sum_{t=0}^{3}\Pr_h[L=t\mid h(x)=a]
+\leq3.
+\]
+\[
+\mathbb E_h[L\mid h(x)=a]
+\leq O(1)+\sum_{\ell\geq0}
+ \sum_{t=4\cdot2^\ell}^{8\cdot2^\ell-1}t\,\Pr_h[L=t\mid h(x)=a].
+\]
+
+\item Within each group, use $t<8\cdot2^\ell$:
+\[
+\mathbb E_h[L\mid h(x)=a]
+\leq O(1)+\sum_{\ell\geq0}
+ \sum_{t=4\cdot2^\ell}^{8\cdot2^\ell-1}
+ 8\cdot2^\ell\,\Pr_h[L=t\mid h(x)=a].
+\]
+
+\item Factor out $8\cdot2^\ell$, which does not depend on $t$:
+\[
+\mathbb E_h[L\mid h(x)=a]
+\leq O(1)+\sum_{\ell\geq0}8\cdot2^\ell
+ \left(\sum_{t=4\cdot2^\ell}^{8\cdot2^\ell-1}\Pr_h[L=t\mid h(x)=a]\right).
+\]
+
+\item Combine the mutually exclusive events $L=t$:
+\[
+\sum_{t=4\cdot2^\ell}^{8\cdot2^\ell-1}\Pr_h[L=t\mid h(x)=a]
+=\Pr_h\!\left[4\cdot2^\ell\leq L<8\cdot2^\ell\mid h(x)=a\right].
+\]
+\[
+\mathbb E_h[|R(x)|\mid h(x)=a]
+\leq O(1)+\sum_{\ell\geq0}8\cdot2^\ell\,
+ \Pr_h\!\left[4\cdot2^\ell\leq|R(x)|<8\cdot2^\ell\mid h(x)=a\right].
+\]
+\end{enumerate}
+
+\[
+\begin{aligned}
+\Pr_h[4\cdot2^\ell\leq|R(x)|<8\cdot2^\ell\mid h(x)=a]
+&\leq
+\underbrace{8P_\ell}_{\text{left}}
++\underbrace{8P_\ell}_{\text{right}}
++\underbrace{P_\ell}_{\text{one extra interval}}\\
+&=17P_\ell.
+\end{aligned}
+\]
+Substituting into the expectation bound and absorbing the fixed constants,
+\[
+\boxed{
+\mathbb E_h[|R(x)|\mid h(x)=a]
+\leq O\!\left(1+\sum_{\ell\geq0}2^\ell P_\ell\right).
+}
+\]
+
+\subsubsection*{Case 1: full independence}
+Fix an $\ell$-interval $I$.
+\[
+Y_y:=\mathbf1[h(y)\in I]\qquad(y\in S\setminus\{x\}).
+\]
+\[
+\Pr_h[Y_y=1]
+=\sum_{j\in I}\Pr_h[h(y)=j]
+\overset{\text{uniformity}}{=}\sum_{j\in I}\frac1m
+=\frac{|I|}{m}.
+\]
+Independence handles the conditioning: because $y\neq x$, knowing $h(x)=a$
+does not change these probabilities. Thus,
+\[
+\Pr_h[Y_y=1\mid h(x)=a]
+\overset{\text{full independence}}{=}\Pr_h[Y_y=1]
+\overset{\text{uniformity}}{=}\frac{|I|}{m}.
+\]
+\[
+X:=\sum_{y\in S\setminus\{x\}}Y_y,\qquad
+\mu:=\mathbb E_h[X\mid h(x)=a].
+\]
+\[
+\begin{aligned}
+\mu
+&\overset{\text{linearity}}{=}\sum_{y\in S\setminus\{x\}}
+ \Pr_h[Y_y=1\mid h(x)=a]\\
+&\overset{\substack{\text{uniformity}\\\text{2-wise independence}}}{=}
+ \frac{|S\setminus\{x\}|\,|I|}{m}
+\leq\frac23\,2^\ell.
+\end{aligned}
+\]
+\[
+\begin{aligned}
+P_\ell&:=\Pr_h[X\geq\tfrac34\,2^\ell\mid h(x)=a]\\
+&\leq\Pr\!\left[X-\mu\geq\frac1{12}\,2^\ell\mid h(x)=a\right]\\
+&\overset{\substack{\text{Chernoff}\\\text{full independence}}}{\leq}
+e^{-\Omega(2^\ell)}
+=O(2^{-2\ell}).
+\end{aligned}
+\]
+\[
+\begin{aligned}
+\mathbb E_h[|R(x)|\mid h(x)=a]
+&\leq O\!\left(1+\sum_{\ell\geq0}2^\ell e^{-\Omega(2^\ell)}\right)\\
+&\leq O\!\left(1+\sum_{\ell\geq0}2^{-\ell}\right)
+=O(1),\\
+\mathbb E_h[T_{\mathsf{op}}(x)\mid h(x)=a]&=O(1).
+\end{aligned}
+\]
+
+\clearpage
+\subsubsection*{Case 2: 5-wise independence}
+\[
+\mathcal H\text{ uniform, 5-wise independent},\qquad h(x)=a\text{ fixed}.
+\]
+For $1\leq r\leq4$, distinct $y_1,\ldots,y_r\in S\setminus\{x\}$, and
+$j_1,\ldots,j_r\in[m]$,
+\[
+\begin{aligned}
+\Pr_h\!\left[\bigwedge_{q=1}^{r}h(y_q)=j_q\,\middle|\,h(x)=a\right]
+&=\frac{\Pr_h\!\left[h(x)=a\ \land\ \bigwedge_{q=1}^{r}h(y_q)=j_q\right]}
+ {\Pr_h[h(x)=a]}\\
+&\overset{\substack{\text{uniformity}\\\text{5-wise independence}}}{=}
+\frac{m^{-(r+1)}}{m^{-1}}
+=m^{-r}\\
+&\overset{\substack{\text{uniformity}\\\text{2-wise independence}}}{=}
+\prod_{q=1}^{r}\Pr_h[h(y_q)=j_q\mid h(x)=a].
+\end{aligned}
+\]
+Thus, after conditioning on $h(x)=a$, the other hash values remain uniform
+and 4-wise independent. The indicators $Y_y$ are therefore 4-wise independent,
+with $\Pr_h[Y_y=1\mid h(x)=a]=|I|/m$.
+With the same $X$ and $\mu$ as above, write $s:=2^\ell$.
+For $\mu\geq1$, the lecture's fourth-moment Chebyshev bound gives
+\[
+\Pr_h[|X-\mu|>d\sqrt\mu\mid h(x)=a]
+\overset{\substack{\text{Chebyshev}\\\text{4-wise independence}}}{<}
+\frac4{d^4}\qquad(d>0).
+\]
+Choose $d$ so that the lemma's threshold is below our threshold $s/12$:
+\[
+d\sqrt\mu<\frac{s}{12}
+\quad\Longleftarrow\quad
+d\sqrt{\frac23s}<\frac{s}{12}
+\quad\Longleftrightarrow\quad
+d<\frac{\sqrt s}{12\sqrt{2/3}}.
+\]
+A convenient choice is
+\[
+d:=\frac{\sqrt s}{10},\qquad
+d\sqrt\mu\leq\frac{\sqrt{2/3}}{10}s<\frac{s}{12}.
+\]
+Thus,
+\[
+\begin{aligned}
+P_\ell
+&=\Pr_h[X\geq\tfrac34s\mid h(x)=a]\\
+&\leq\Pr_h[|X-\mu|\geq s/12\mid h(x)=a]\\
+&\leq\Pr_h[|X-\mu|>d\sqrt\mu\mid h(x)=a]\\
+&\overset{\substack{\text{Chebyshev}\\\text{4-wise independence}}}{<}
+\frac4{d^4}
+=\frac4{(\sqrt s/10)^4}
+=\frac{40000}{s^2}
+=O(2^{-2\ell}).
+\end{aligned}
+\]
+Therefore,
+\[
+\begin{aligned}
+\mathbb E_h[|R(x)|\mid h(x)=a]
+&\leq O\!\left(1+\sum_{\ell\geq0}2^\ell O(2^{-2\ell})\right)\\
+&=O\!\left(1+\sum_{\ell\geq0}2^{-\ell}\right)
+=O(1),\\
+\mathbb E_h[T_{\mathsf{op}}(x)\mid h(x)=a]&=O(1).
+\end{aligned}
+\]
+
+\subsubsection*{Removing the conditioning: both cases}
+In both cases, the $O(1)$ bound is uniform in $a$.
+The run itself need not be independent of $h(x)$; remove the conditioning
+by the law of total expectation:
+\[
+\begin{aligned}
+\mathbb E_h[T_{\mathsf{op}}(x)]
+&=\sum_{a\in[m]}\Pr_h[h(x)=a]\,
+ \mathbb E_h[T_{\mathsf{op}}(x)\mid h(x)=a]\\
+&\leq O(1)\sum_{a\in[m]}\Pr_h[h(x)=a]\\
+&=O(1).
+\end{aligned}
+\]
 
 \clearpage
 \section*{General questions}
